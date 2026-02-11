@@ -21,8 +21,20 @@ export const LEVEL_BALANCING = [
   1000  // Level 19 -> 20
 ];
 
+export const DYNAMIC_SONG_CONFIG = {
+  initialCoinCost: 100,
+  coinCostIncreasePerStep: 50,
+  songPurchasesPerStep: 2,
+  maxCoinCost: 500
+};
+
 export function getXpRequired(level) {
-  // level 1 is index 0
   const index = Math.min(level - 1, LEVEL_BALANCING.length - 1);
   return LEVEL_BALANCING[index];
+}
+
+export function setXpRequired(levelIndex, value) {
+  if (levelIndex >= 0 && levelIndex < LEVEL_BALANCING.length) {
+    LEVEL_BALANCING[levelIndex] = value;
+  }
 }

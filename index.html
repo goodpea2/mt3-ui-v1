@@ -105,6 +105,14 @@
                           radial-gradient(circle at 80% 70%, rgba(255,215,0,0.1) 0%, transparent 40%);
         pointer-events: none;
       }
+
+      .debug-input {
+        @apply bg-black/40 border border-white/10 rounded p-1.5 text-white text-[10px] font-black outline-none focus:border-cyan-500 w-full;
+      }
+      
+      .debug-label {
+        @apply text-[8px] font-bold text-white/40 uppercase mb-0.5;
+      }
     </style>
   </head>
   <body>
@@ -117,7 +125,10 @@
         <div id="tabs-root" class="z-20"></div>
         <div id="content-root" class="flex-1 overflow-y-auto px-4 pt-4 pb-40 space-y-4 no-scrollbar" style="scroll-behavior: smooth; -webkit-overflow-scrolling: touch;"></div>
         <div id="nav-root" class="z-50"></div>
-        <div id="popup-layer" class="absolute inset-0 pointer-events-none flex items-center justify-center z-40"></div>
+        
+        <!-- Layers -->
+        <div id="popup-layer" class="absolute inset-0 pointer-events-none flex items-center justify-center z-[100]"></div>
+        <div id="debug-root" class="absolute top-0 left-0 w-full z-[110] pointer-events-none"></div>
       </div>
     </div>
     <script type="module" src="index.js"></script>
