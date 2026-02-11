@@ -80,19 +80,6 @@
         50% { opacity: 0.25; transform: scale(1.1); }
       }
 
-      /* Particles animation */
-      .particle {
-        position: fixed;
-        pointer-events: none;
-        z-index: 100;
-        animation: fly-particle 0.8s cubic-bezier(0.1, 0.8, 0.4, 1.0) forwards;
-      }
-      @keyframes fly-particle {
-        0% { transform: scale(0.5); opacity: 0; }
-        20% { opacity: 1; }
-        100% { transform: translate(var(--tx), var(--ty)) scale(1.2); opacity: 0; }
-      }
-
       .reward-popup {
         animation: slide-up-fade 0.8s ease-out forwards;
       }
@@ -102,7 +89,15 @@
         100% { opacity: 0; transform: translateY(-30px); }
       }
 
-      /* Deluxe expanded sparkle overlay */
+      .target-flash {
+        animation: flash-hit 0.3s cubic-bezier(0.1, 0.8, 0.4, 1);
+      }
+      @keyframes flash-hit {
+        0% { transform: scale(1); filter: brightness(1); }
+        50% { transform: scale(1.15); filter: brightness(1.8) drop-shadow(0 0 10px white); }
+        100% { transform: scale(1); filter: brightness(1); }
+      }
+
       .deluxe-sparkle {
         position: absolute;
         inset: 0;

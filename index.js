@@ -2,6 +2,7 @@
 import { getSongCardHtml } from './SongCard.js';
 import { MOCK_SONGS } from './songs.js';
 import { getXpRequired } from './balance.js';
+import { VFXManager } from './vfx/Manager.js';
 
 // --- Constants ---
 const CATEGORIES = [
@@ -9,6 +10,7 @@ const CATEGORIES = [
 ];
 
 // --- Simulation State ---
+// We keep visualUser for UI counters so the actual user state can update instantly in logic
 const state = {
   activeCategory: 'HOME',
   user: {
@@ -18,6 +20,11 @@ const state = {
     coins: 100,
     stamina: 275,
     maxStamina: 400,
+  },
+  visualUser: {
+    level: 1,
+    xp: 0,
+    coins: 100
   },
   songs: MOCK_SONGS,
   expandedSongId: 'song-0'
@@ -34,8 +41,8 @@ window.playSong = (id) => {
   const song = state.songs.find(s => s.id === id);
   if (!song) return;
 
-  const xpGained = Math.floor(Math.random() * 101) + 150; 
-  const coinsGained = Math.floor(Math.random() * 31) + 50; 
+  const xpGained = Math.floor(Math.random() * 51) + 100; 
+  const coinsGained = Math.floor(Math.random() * 21) + 30; 
   const starGained = Math.floor(Math.random() * 2) + 2;   
 
   // Get coords for animation
@@ -45,55 +52,42 @@ window.playSong = (id) => {
   
   if (btn && targetXp && targetCoins) {
     const startRect = btn.getBoundingClientRect();
-    const xpRect = targetXp.getBoundingClientRect();
-    const coinRect = targetCoins.getBoundingClientRect();
 
-    spawnParticles(startRect, xpRect, 'cyan', 5);
-    spawnParticles(startRect, coinRect, 'gold', 5);
+    // Trigger XP Flow
+    VFXManager.spawnRewards('xp', xpGained, startRect, targetXp, (increment) => {
+      state.visualUser.xp += increment;
+      checkLevelUpVisual();
+      renderHeader();
+    });
+
+    // Trigger Coin Flow
+    VFXManager.spawnRewards('coin', coinsGained, startRect, targetCoins, (increment) => {
+      state.visualUser.coins += increment;
+      renderHeader();
+    });
   }
 
-  // Update song
+  // Update song data
   song.starLevel = Math.min(6, song.starLevel + starGained);
   song.score += Math.floor(Math.random() * 500) + 500;
   
-  // Update user with delay to match particles
-  setTimeout(() => {
-    state.user.xp += xpGained;
-    state.user.coins += coinsGained;
-
-    // Handle Level Up
-    while (state.user.xp >= getXpRequired(state.user.level)) {
-      state.user.xp -= getXpRequired(state.user.level);
-      state.user.level += 1;
-      showPopup(`LEVEL UP! LV.${state.user.level}`, "text-yellow-400 font-black text-4xl");
-    }
-
-    renderHeader();
-    renderContent();
-  }, 700);
+  // Logic update (happens behind scenes)
+  state.user.xp += xpGained;
+  state.user.coins += coinsGained;
+  while (state.user.xp >= getXpRequired(state.user.level)) {
+    state.user.xp -= getXpRequired(state.user.level);
+    state.user.level += 1;
+  }
+  
+  renderContent();
 };
 
-function spawnParticles(start, end, color, count) {
-  for (let i = 0; i < count; i++) {
-    const p = document.createElement('div');
-    const size = Math.random() * 10 + 5;
-    p.className = 'particle';
-    p.style.width = `${size}px`;
-    p.style.height = `${size}px`;
-    p.style.borderRadius = '50%';
-    p.style.backgroundColor = color === 'cyan' ? '#22d3ee' : '#fbbf24';
-    p.style.boxShadow = `0 0 8px ${p.style.backgroundColor}`;
-    p.style.left = `${start.left + start.width / 2}px`;
-    p.style.top = `${start.top + start.height / 2}px`;
-    
-    const tx = end.left - start.left + (Math.random() * 20 - 10);
-    const ty = end.top - start.top + (Math.random() * 20 - 10);
-    
-    p.style.setProperty('--tx', `${tx}px`);
-    p.style.setProperty('--ty', `${ty}px`);
-    
-    document.body.appendChild(p);
-    setTimeout(() => p.remove(), 800);
+function checkLevelUpVisual() {
+  const reqXp = getXpRequired(state.visualUser.level);
+  if (state.visualUser.xp >= reqXp) {
+    state.visualUser.xp -= reqXp;
+    state.visualUser.level += 1;
+    showPopup(`LEVEL UP! LV.${state.visualUser.level}`, "text-yellow-400 font-black text-4xl");
   }
 }
 
@@ -107,9 +101,8 @@ function showPopup(text, classes) {
 }
 
 function renderHeader() {
-  const staminaPct = (state.user.stamina / state.user.maxStamina) * 100;
-  const reqXp = getXpRequired(state.user.level);
-  const xpPct = (state.user.xp / reqXp) * 100;
+  const reqXp = getXpRequired(state.visualUser.level);
+  const xpPct = (state.visualUser.xp / reqXp) * 100;
   
   const container = document.getElementById('header-root');
   if (!container) return;
@@ -121,15 +114,15 @@ function renderHeader() {
             <img src="https://picsum.photos/seed/avatar/200/200" alt="Avatar" class="w-full h-full object-cover rounded-2xl" />
           </div>
           <div class="absolute -bottom-1 -right-1 bg-gradient-to-b from-[#4ade80] to-[#22c55e] border-2 border-[#1a0b3d] text-white text-[11px] font-black px-1.5 py-0.5 rounded-lg shadow-lg">
-            LV.${state.user.level}
+            LV.${state.visualUser.level}
           </div>
         </div>
         <div class="flex flex-col gap-1">
           <span class="text-white font-black text-sm ml-1">${state.user.name}</span>
           <div id="xp-target" class="relative w-40 h-4 bg-[#1a0b3d] border border-white/10 rounded-full overflow-hidden flex items-center shadow-inner">
-             <div class="absolute h-full left-0 top-0 bg-gradient-to-r from-cyan-400 to-blue-500 transition-all duration-500" style="width: ${xpPct}%"></div>
+             <div class="absolute h-full left-0 top-0 bg-gradient-to-r from-cyan-400 to-blue-500 transition-all duration-300" style="width: ${xpPct}%"></div>
              <div class="relative w-full text-center text-[8px] font-black text-white/80 z-10 uppercase tracking-widest">
-               XP ${Math.floor(state.user.xp)} / ${reqXp}
+               XP ${Math.floor(state.visualUser.xp)} / ${reqXp}
              </div>
           </div>
         </div>
@@ -138,7 +131,7 @@ function renderHeader() {
         <div class="w-5 h-5 rounded-full bg-gradient-to-br from-yellow-400 to-orange-600 flex items-center justify-center shadow-lg">
            <span class="text-white font-black text-[10px]">$</span>
         </div>
-        <span class="text-white font-extrabold text-lg italic tracking-tighter">${state.user.coins.toLocaleString()}</span>
+        <span class="text-white font-extrabold text-lg italic tracking-tighter">${Math.floor(state.visualUser.coins).toLocaleString()}</span>
       </div>
     </div>
   `;

@@ -1,5 +1,5 @@
 
-export const LEVEL_BALANCING = Array.from({ length: 20 }, (_, i) => 100 + (i * 50));
+export const LEVEL_BALANCING = Array.from({ length: 19 }, (_, i) => 100 + (i * 50));
 
 export function getXpRequired(level) {
   // level 1 is index 0
