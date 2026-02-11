@@ -19,7 +19,7 @@ const state = {
   visualUser: {
     level: 1,
     xp: 0,
-    coins: 2500
+    coins: 100
   },
   stats: {
     totalPlayCount: 0,
@@ -33,10 +33,10 @@ const state = {
   dynamicSongCostEnabled: false,
   purchasedSongCount: 0,
   gameConfig: {
-    minXp: 100,
-    maxXp: 150,
-    minCoins: 30,
-    maxCoins: 50
+    minXp: 150,
+    maxXp: 250,
+    minCoins: 70,
+    maxCoins: 120
   },
   // Tracks which config sections are expanded in Debug UI
   debugSections: {
