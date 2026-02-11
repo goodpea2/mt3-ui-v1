@@ -10,7 +10,9 @@ export const MOCK_SONGS = [
     coverUrl: "https://picsum.photos/seed/song0/400/400",
     starLevel: 3,
     isSotd: true,
-    isDeluxe: true
+    isDeluxe: true,
+    isLocked: false,
+    coinCost: 1000
   },
   {
     id: "song-1",
@@ -22,7 +24,9 @@ export const MOCK_SONGS = [
     coverUrl: "https://picsum.photos/seed/song1/400/400",
     starLevel: 0,
     isSotd: false,
-    isDeluxe: false
+    isDeluxe: false,
+    isLocked: true,
+    coinCost: 1000
   },
   {
     id: "song-2",
@@ -34,7 +38,9 @@ export const MOCK_SONGS = [
     coverUrl: "https://picsum.photos/seed/song2/400/400",
     starLevel: 2,
     isSotd: false,
-    isDeluxe: false
+    isDeluxe: false,
+    isLocked: false,
+    coinCost: 1500
   },
   {
     id: "song-3",
@@ -46,7 +52,9 @@ export const MOCK_SONGS = [
     coverUrl: "https://picsum.photos/seed/song3/400/400",
     starLevel: 0,
     isSotd: false,
-    isDeluxe: false
+    isDeluxe: false,
+    isLocked: true,
+    coinCost: 1000
   },
   {
     id: "song-4",
@@ -58,7 +66,9 @@ export const MOCK_SONGS = [
     coverUrl: "https://picsum.photos/seed/song4/400/400",
     starLevel: 1,
     isSotd: false,
-    isDeluxe: true
+    isDeluxe: true,
+    isLocked: false,
+    coinCost: 2000
   },
   {
     id: "song-5",
@@ -70,7 +80,9 @@ export const MOCK_SONGS = [
     coverUrl: "https://picsum.photos/seed/song5/400/400",
     starLevel: 0,
     isSotd: false,
-    isDeluxe: false
+    isDeluxe: false,
+    isLocked: true,
+    coinCost: 1200
   },
   {
     id: "song-6",
@@ -82,7 +94,9 @@ export const MOCK_SONGS = [
     coverUrl: "https://picsum.photos/seed/song6/400/400",
     starLevel: 4,
     isSotd: false,
-    isDeluxe: false
+    isDeluxe: false,
+    isLocked: false,
+    coinCost: 1500
   },
   {
     id: "song-7",
@@ -94,7 +108,9 @@ export const MOCK_SONGS = [
     coverUrl: "https://picsum.photos/seed/song7/400/400",
     starLevel: 0,
     isSotd: false,
-    isDeluxe: false
+    isDeluxe: false,
+    isLocked: true,
+    coinCost: 5000
   },
   {
     id: "song-8",
@@ -106,7 +122,9 @@ export const MOCK_SONGS = [
     coverUrl: "https://picsum.photos/seed/song8/400/400",
     starLevel: 3,
     isSotd: false,
-    isDeluxe: true
+    isDeluxe: true,
+    isLocked: false,
+    coinCost: 1000
   },
   {
     id: "song-9",
@@ -118,7 +136,9 @@ export const MOCK_SONGS = [
     coverUrl: "https://picsum.photos/seed/song9/400/400",
     starLevel: 0,
     isSotd: false,
-    isDeluxe: false
+    isDeluxe: false,
+    isLocked: true,
+    coinCost: 2000
   },
   {
     id: "song-10",
@@ -130,7 +150,9 @@ export const MOCK_SONGS = [
     coverUrl: "https://picsum.photos/seed/song10/400/400",
     starLevel: 1,
     isSotd: false,
-    isDeluxe: false
+    isDeluxe: false,
+    isLocked: false,
+    coinCost: 1500
   },
   {
     id: "song-11",
@@ -142,7 +164,9 @@ export const MOCK_SONGS = [
     coverUrl: "https://picsum.photos/seed/song11/400/400",
     starLevel: 0,
     isSotd: false,
-    isDeluxe: true
+    isDeluxe: true,
+    isLocked: true,
+    coinCost: 1000
   },
   {
     id: "song-12",
@@ -154,7 +178,9 @@ export const MOCK_SONGS = [
     coverUrl: "https://picsum.photos/seed/song12/400/400",
     starLevel: 2,
     isSotd: false,
-    isDeluxe: false
+    isDeluxe: false,
+    isLocked: false,
+    coinCost: 1200
   },
   {
     id: "song-13",
@@ -166,7 +192,9 @@ export const MOCK_SONGS = [
     coverUrl: "https://picsum.photos/seed/song13/400/400",
     starLevel: 0,
     isSotd: false,
-    isDeluxe: false
+    isDeluxe: false,
+    isLocked: true,
+    coinCost: 1500
   },
   {
     id: "song-14",
@@ -178,7 +206,9 @@ export const MOCK_SONGS = [
     coverUrl: "https://picsum.photos/seed/song14/400/400",
     starLevel: 5,
     isSotd: false,
-    isDeluxe: false
+    isDeluxe: false,
+    isLocked: false,
+    coinCost: 1000
   },
   {
     id: "song-15",
@@ -190,7 +220,9 @@ export const MOCK_SONGS = [
     coverUrl: "https://picsum.photos/seed/song15/400/400",
     starLevel: 0,
     isSotd: false,
-    isDeluxe: true
+    isDeluxe: true,
+    isLocked: true,
+    coinCost: 2000
   },
   {
     id: "song-16",
@@ -202,7 +234,9 @@ export const MOCK_SONGS = [
     coverUrl: "https://picsum.photos/seed/song16/400/400",
     starLevel: 1,
     isSotd: false,
-    isDeluxe: false
+    isDeluxe: false,
+    isLocked: false,
+    coinCost: 1500
   },
   {
     id: "song-17",
@@ -214,7 +248,9 @@ export const MOCK_SONGS = [
     coverUrl: "https://picsum.photos/seed/song17/400/400",
     starLevel: 4,
     isSotd: false,
-    isDeluxe: false
+    isDeluxe: false,
+    isLocked: false,
+    coinCost: 1000
   },
   {
     id: "song-18",
@@ -226,7 +262,9 @@ export const MOCK_SONGS = [
     coverUrl: "https://picsum.photos/seed/song18/400/400",
     starLevel: 0,
     isSotd: false,
-    isDeluxe: true
+    isDeluxe: true,
+    isLocked: true,
+    coinCost: 3000
   },
   {
     id: "song-19",
@@ -238,7 +276,9 @@ export const MOCK_SONGS = [
     coverUrl: "https://picsum.photos/seed/song19/400/400",
     starLevel: 2,
     isSotd: false,
-    isDeluxe: false
+    isDeluxe: false,
+    isLocked: false,
+    coinCost: 1200
   },
   {
     id: "song-20",
@@ -250,7 +290,9 @@ export const MOCK_SONGS = [
     coverUrl: "https://picsum.photos/seed/song20/400/400",
     starLevel: 0,
     isSotd: false,
-    isDeluxe: false
+    isDeluxe: false,
+    isLocked: true,
+    coinCost: 1000
   },
   {
     id: "song-21",
@@ -262,7 +304,9 @@ export const MOCK_SONGS = [
     coverUrl: "https://picsum.photos/seed/song21/400/400",
     starLevel: 2,
     isSotd: false,
-    isDeluxe: false
+    isDeluxe: false,
+    isLocked: false,
+    coinCost: 2000
   },
   {
     id: "song-22",
@@ -274,7 +318,9 @@ export const MOCK_SONGS = [
     coverUrl: "https://picsum.photos/seed/song22/400/400",
     starLevel: 0,
     isSotd: false,
-    isDeluxe: true
+    isDeluxe: true,
+    isLocked: true,
+    coinCost: 1500
   },
   {
     id: "song-23",
@@ -286,7 +332,9 @@ export const MOCK_SONGS = [
     coverUrl: "https://picsum.photos/seed/song23/400/400",
     starLevel: 6,
     isSotd: false,
-    isDeluxe: false
+    isDeluxe: false,
+    isLocked: false,
+    coinCost: 1000
   },
   {
     id: "song-24",
@@ -298,7 +346,9 @@ export const MOCK_SONGS = [
     coverUrl: "https://picsum.photos/seed/song24/400/400",
     starLevel: 0,
     isSotd: false,
-    isDeluxe: false
+    isDeluxe: false,
+    isLocked: true,
+    coinCost: 1200
   },
   {
     id: "song-25",
@@ -310,7 +360,9 @@ export const MOCK_SONGS = [
     coverUrl: "https://picsum.photos/seed/song25/400/400",
     starLevel: 3,
     isSotd: false,
-    isDeluxe: false
+    isDeluxe: false,
+    isLocked: false,
+    coinCost: 1000
   },
   {
     id: "song-26",
@@ -322,7 +374,9 @@ export const MOCK_SONGS = [
     coverUrl: "https://picsum.photos/seed/song26/400/400",
     starLevel: 0,
     isSotd: false,
-    isDeluxe: false
+    isDeluxe: false,
+    isLocked: true,
+    coinCost: 1500
   },
   {
     id: "song-27",
@@ -334,7 +388,9 @@ export const MOCK_SONGS = [
     coverUrl: "https://picsum.photos/seed/song27/400/400",
     starLevel: 2,
     isSotd: false,
-    isDeluxe: false
+    isDeluxe: false,
+    isLocked: false,
+    coinCost: 1200
   },
   {
     id: "song-28",
@@ -346,7 +402,9 @@ export const MOCK_SONGS = [
     coverUrl: "https://picsum.photos/seed/song28/400/400",
     starLevel: 0,
     isSotd: false,
-    isDeluxe: true
+    isDeluxe: true,
+    isLocked: true,
+    coinCost: 2000
   },
   {
     id: "song-29",
@@ -358,6 +416,8 @@ export const MOCK_SONGS = [
     coverUrl: "https://picsum.photos/seed/song29/400/400",
     starLevel: 3,
     isSotd: false,
-    isDeluxe: false
+    isDeluxe: false,
+    isLocked: false,
+    coinCost: 2000
   }
 ];

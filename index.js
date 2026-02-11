@@ -10,24 +10,24 @@ const CATEGORIES = [
 ];
 
 // --- Simulation State ---
-// We keep visualUser for UI counters so the actual user state can update instantly in logic
 const state = {
   activeCategory: 'HOME',
   user: {
     name: 'Player One',
     level: 1,
     xp: 0,
-    coins: 100,
+    coins: 2500, 
     stamina: 275,
     maxStamina: 400,
   },
   visualUser: {
     level: 1,
     xp: 0,
-    coins: 100
+    coins: 2500
   },
   songs: MOCK_SONGS,
-  expandedSongId: 'song-0'
+  expandedSongId: 'song-0',
+  unlockingTimers: {} 
 };
 
 window.toggleExpand = (id) => {
@@ -37,15 +37,68 @@ window.toggleExpand = (id) => {
   }
 };
 
+window.unlockWithCoins = (id) => {
+  const song = state.songs.find(s => s.id === id);
+  if (!song || !song.isLocked) return;
+
+  if (state.user.coins < song.coinCost) {
+    showPopup("NOT ENOUGH COINS", "text-red-500 font-black text-2xl");
+    return;
+  }
+
+  const btn = document.getElementById(`purchase-btn-${id}`);
+  const counter = document.getElementById('coins-target');
+  
+  if (btn && counter) {
+    const targetRect = btn.getBoundingClientRect();
+    VFXManager.spawnSpend('coin', song.coinCost, counter, targetRect, () => {});
+  }
+
+  state.user.coins -= song.coinCost;
+  
+  setTimeout(() => {
+    state.visualUser.coins -= song.coinCost;
+    song.isLocked = false;
+    showPopup("SONG UNLOCKED!", "text-yellow-400 font-black text-2xl");
+    renderHeader();
+    renderContent();
+  }, 800);
+};
+
+window.unlockWithAd = (id) => {
+  const song = state.songs.find(s => s.id === id);
+  if (!song || !song.isLocked || state.unlockingTimers[id]) return;
+
+  const btn = document.getElementById(`free-btn-${id}`);
+  if (!btn) return;
+
+  let timeLeft = 5;
+  btn.disabled = true;
+  btn.classList.add('opacity-50', 'grayscale');
+  btn.innerHTML = `WAIT ${timeLeft}S`;
+  
+  state.unlockingTimers[id] = setInterval(() => {
+    timeLeft -= 1;
+    if (timeLeft <= 0) {
+      clearInterval(state.unlockingTimers[id]);
+      delete state.unlockingTimers[id];
+      song.isLocked = false;
+      showPopup("FREE UNLOCK COMPLETE!", "text-cyan-400 font-black text-2xl");
+      renderContent();
+    } else {
+      btn.innerHTML = `WAIT ${timeLeft}S`;
+    }
+  }, 1000);
+};
+
 window.playSong = (id) => {
   const song = state.songs.find(s => s.id === id);
-  if (!song) return;
+  if (!song || song.isLocked) return;
 
   const xpGained = Math.floor(Math.random() * 51) + 100; 
   const coinsGained = Math.floor(Math.random() * 21) + 30; 
-  const starGained = Math.floor(Math.random() * 2) + 2;   
+  const starGained = Math.floor(Math.random() * 2) + 1;   
 
-  // Get coords for animation
   const btn = document.getElementById(`play-btn-${id}`);
   const targetXp = document.getElementById('xp-target');
   const targetCoins = document.getElementById('coins-target');
@@ -53,25 +106,21 @@ window.playSong = (id) => {
   if (btn && targetXp && targetCoins) {
     const startRect = btn.getBoundingClientRect();
 
-    // Trigger XP Flow
     VFXManager.spawnRewards('xp', xpGained, startRect, targetXp, (increment) => {
       state.visualUser.xp += increment;
       checkLevelUpVisual();
       renderHeader();
     });
 
-    // Trigger Coin Flow
     VFXManager.spawnRewards('coin', coinsGained, startRect, targetCoins, (increment) => {
       state.visualUser.coins += increment;
       renderHeader();
     });
   }
 
-  // Update song data
   song.starLevel = Math.min(6, song.starLevel + starGained);
   song.score += Math.floor(Math.random() * 500) + 500;
   
-  // Logic update (happens behind scenes)
   state.user.xp += xpGained;
   state.user.coins += coinsGained;
   while (state.user.xp >= getXpRequired(state.user.level)) {
@@ -94,10 +143,10 @@ function checkLevelUpVisual() {
 function showPopup(text, classes) {
   const layer = document.getElementById('popup-layer');
   const popup = document.createElement('div');
-  popup.className = `reward-popup absolute flex flex-col items-center justify-center pointer-events-none ${classes} z-[100]`;
+  popup.className = `reward-popup absolute flex flex-col items-center justify-center pointer-events-none ${classes} z-[100] drop-shadow-[0_0_10px_rgba(0,0,0,0.5)]`;
   popup.innerText = text;
   layer.appendChild(popup);
-  setTimeout(() => popup.remove(), 1000);
+  setTimeout(() => popup.remove(), 1200);
 }
 
 function renderHeader() {
@@ -127,11 +176,11 @@ function renderHeader() {
           </div>
         </div>
       </div>
-      <div id="coins-target" class="bg-[#1a0b3d] border-2 border-[#4a2d8a] rounded-2xl px-3 py-1.5 flex items-center gap-2 shadow-inner">
-        <div class="w-5 h-5 rounded-full bg-gradient-to-br from-yellow-400 to-orange-600 flex items-center justify-center shadow-lg">
-           <span class="text-white font-black text-[10px]">$</span>
+      <div id="coins-target" class="bg-[#1a0b3d] border-2 border-[#4a2d8a] rounded-2xl px-3 py-1.5 flex items-center gap-2 shadow-inner transition-transform duration-300">
+        <div class="w-6 h-6 rounded-full bg-gradient-to-br from-yellow-400 to-orange-600 flex items-center justify-center shadow-lg border border-white/20">
+           <span class="text-white font-black text-[12px] leading-none">$</span>
         </div>
-        <span class="text-white font-extrabold text-lg italic tracking-tighter">${Math.floor(state.visualUser.coins).toLocaleString()}</span>
+        <span class="text-yellow-400 font-black text-lg italic tracking-tighter drop-shadow-sm">${Math.floor(state.visualUser.coins).toLocaleString()}</span>
       </div>
     </div>
   `;

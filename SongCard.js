@@ -24,14 +24,15 @@ const getStarConfig = (level) => {
 const ICONS = {
   star: `<svg class="w-full h-full" viewBox="0 0 24 24" fill="currentColor"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" /></svg>`,
   crown: `<svg class="w-full h-full" viewBox="0 0 24 24" fill="currentColor"><path d="M5 16L3 5L8.5 10L12 4L15.5 10L21 5L19 16H5M19 19C19 19.6 18.6 20 18 20H6C5.4 20 5 19.6 5 19V18H19V19Z" /></svg>`,
-  empty: `<svg class="w-full h-full opacity-20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" /></svg>`
+  empty: `<svg class="w-full h-full opacity-20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" /></svg>`,
+  coin: `<div class="w-3.5 h-3.5 rounded-full bg-gradient-to-br from-yellow-400 to-orange-600 flex items-center justify-center shadow-lg shrink-0 border border-white/20"><span class="text-white font-black text-[8px] leading-none">$</span></div>`
 };
 
 export function getSongCardHtml(song, isExpanded) {
   const { 
     id, title, artist, level, score = 0, 
     playCount = "15K", isDeluxe = false, isSotd = false, 
-    coverUrl, starLevel = 0 
+    coverUrl, starLevel = 0, isLocked = false, coinCost = 1000
   } = song;
 
   const difficulty = DIFFICULTY_MAP[level];
@@ -49,7 +50,7 @@ export function getSongCardHtml(song, isExpanded) {
   const starConfig = getStarConfig(starLevel);
   const starSizeClass = "w-6 h-6";
 
-  const showStars = isExpanded || (starLevel > 0);
+  const showStars = !isLocked && (isExpanded || (starLevel > 0));
   const starsHtml = showStars ? `
     <div class="flex gap-0.5 transition-all duration-300 ${isExpanded ? 'star-vfx' : ''}" style="color: ${levelHex}">
       ${starConfig.map(type => `
@@ -75,7 +76,29 @@ export function getSongCardHtml(song, isExpanded) {
     ? (isDeluxe ? "bg-gradient-to-br from-yellow-50 via-white to-orange-100" : "bg-gradient-to-br from-white via-blue-50 to-blue-100")
     : (isDeluxe ? "bg-gradient-to-r from-[#5a1a1a] via-[#2d1b5e] to-[#1a0b3d]" : "bg-gradient-to-r from-[#2d1b5e] to-[#1a0b3d]");
 
-  const isButtonVisible = isExpanded || starLevel === 0;
+  const isButtonVisible = !isLocked && (isExpanded || starLevel === 0);
+
+  // Locked specific buttons: Purchase is smaller and tinted purple
+  const lockedButtons = isLocked ? `
+    <div class="flex items-center gap-2">
+      <button 
+        id="purchase-btn-${id}"
+        onclick="event.stopPropagation(); window.unlockWithCoins('${id}')"
+        class="flex items-center gap-1.5 bg-gradient-to-b from-indigo-400 to-blue-600 text-white font-black italic text-[9px] px-2.5 py-1.5 rounded-xl border-b-2 border-indigo-900 active:border-b-0 active:translate-y-[1px] transition-all shadow-md group"
+      >
+        ${ICONS.coin}
+        <span class="text-yellow-300 drop-shadow-sm">${coinCost.toLocaleString()}</span>
+      </button>
+      <button 
+        id="free-btn-${id}"
+        onclick="event.stopPropagation(); window.unlockWithAd('${id}')"
+        class="flex items-center gap-1.5 bg-gradient-to-b from-cyan-400 to-blue-500 text-white font-black italic text-[11px] px-5 py-2 rounded-xl border-b-2 border-blue-900 active:border-b-0 active:translate-y-[1px] transition-all shadow-md"
+      >
+        <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
+        FREE
+      </button>
+    </div>
+  ` : '';
 
   return `
     <div class="w-full card-wrapper ${isExpanded ? 'expanded' : 'collapsed'}" data-id="${id}">
@@ -116,21 +139,21 @@ export function getSongCardHtml(song, isExpanded) {
               </div>
               
               <div class="transition-all duration-300 ${isExpanded ? 'h-5 opacity-100 mt-0.5' : 'h-0 opacity-0 overflow-hidden'}">
-                <div class="text-blue-500 font-black text-lg italic tracking-tighter leading-none">
-                  ${score.toLocaleString()}
+                <div class="font-black text-lg italic tracking-tighter leading-none ${isLocked ? 'text-purple-400/50' : 'text-blue-500'}">
+                  ${isLocked ? 'LOCKED' : score.toLocaleString()}
                 </div>
               </div>
             </div>
           </div>
 
           <div class="flex flex-col items-end justify-center gap-1.5 h-full py-0.5 pr-1">
-            ${starsHtml}
+            ${isLocked ? lockedButtons : starsHtml}
             
-            <div class="transition-all duration-300 ${isButtonVisible ? 'opacity-100 h-8 translate-y-0' : 'opacity-0 h-0 translate-y-2 overflow-hidden'}">
+            <div class="transition-all duration-300 ${isButtonVisible ? 'opacity-100 h-10 translate-y-0' : 'opacity-0 h-0 translate-y-2 overflow-hidden'}">
               <button 
                 id="play-btn-${id}"
                 onclick="event.stopPropagation(); window.playSong('${id}')" 
-                class="play-btn-vfx bg-gradient-to-b from-[#ff00ff] to-[#d400d4] text-white font-black italic text-xs px-5 py-1.5 rounded-xl border-b-2 border-[#960096] active:border-b-0 active:translate-y-[2px] transition-all shadow-lg"
+                class="play-btn-vfx bg-gradient-to-b from-[#ff00ff] to-[#d400d4] text-white font-black italic text-sm px-8 py-2.5 rounded-2xl border-b-4 border-[#960096] active:border-b-0 active:translate-y-[2px] transition-all shadow-[0_10px_20px_-5px_rgba(255,0,255,0.4)]"
               >
                 PLAY
               </button>
