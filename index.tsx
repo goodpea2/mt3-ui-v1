@@ -1,0 +1,1 @@
+// File deprecated in favor of vanilla index.js
