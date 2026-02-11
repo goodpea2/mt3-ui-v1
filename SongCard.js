@@ -11,11 +11,11 @@ const DIFFICULTY_MAP = {
 const getStarConfig = (level) => {
   const configs = [
     ['empty', 'empty', 'empty'],
-    ['star', 'empty', 'empty'],
-    ['star', 'star', 'empty'],
+    ['empty', 'empty', 'star'],
+    ['empty', 'star', 'star'],
     ['star', 'star', 'star'],
-    ['crown', 'star', 'star'],
-    ['crown', 'crown', 'star'],
+    ['star', 'star', 'crown'],
+    ['star', 'crown', 'crown'],
     ['crown', 'crown', 'crown'],
   ];
   return configs[level] || configs[0];
@@ -47,8 +47,10 @@ export function getSongCardHtml(song, isExpanded) {
   }
 
   const starConfig = getStarConfig(starLevel);
-  const starSizeClass = "w-6 h-6"; // Same for both states as requested
-  const starsHtml = `
+  const starSizeClass = "w-6 h-6";
+
+  const showStars = isExpanded || (starLevel > 0);
+  const starsHtml = showStars ? `
     <div class="flex gap-0.5 transition-all duration-300 ${isExpanded ? 'star-vfx' : ''}" style="color: ${levelHex}">
       ${starConfig.map(type => `
         <div class="${starSizeClass} transition-all duration-300">
@@ -56,7 +58,7 @@ export function getSongCardHtml(song, isExpanded) {
         </div>
       `).join('')}
     </div>
-  `;
+  ` : '';
 
   const sotdRibbon = isSotd ? `
     <div class="flex justify-end pr-2 -mb-2 relative z-20">
@@ -66,13 +68,14 @@ export function getSongCardHtml(song, isExpanded) {
     </div>
   ` : '';
 
-  // Height is 80px collapsed, 100px expanded (1.25x)
   const cardHeightClass = isExpanded ? 'h-[100px]' : 'h-[80px]';
   const containerClass = `song-card relative w-full rounded-2xl overflow-hidden cursor-pointer ${cardHeightClass} ${isExpanded ? 'fancy-outline-container' : 'shadow-md'}`;
   
   let contentBg = isExpanded 
     ? (isDeluxe ? "bg-gradient-to-br from-yellow-50 via-white to-orange-100" : "bg-gradient-to-br from-white via-blue-50 to-blue-100")
     : (isDeluxe ? "bg-gradient-to-r from-[#5a1a1a] via-[#2d1b5e] to-[#1a0b3d]" : "bg-gradient-to-r from-[#2d1b5e] to-[#1a0b3d]");
+
+  const isButtonVisible = isExpanded || starLevel === 0;
 
   return `
     <div class="w-full card-wrapper ${isExpanded ? 'expanded' : 'collapsed'}" data-id="${id}">
@@ -120,10 +123,10 @@ export function getSongCardHtml(song, isExpanded) {
             </div>
           </div>
 
-          <div class="flex flex-col items-end justify-between h-full py-0.5 pr-1">
+          <div class="flex flex-col items-end justify-center gap-1.5 h-full py-0.5 pr-1">
             ${starsHtml}
             
-            <div class="transition-all duration-300 ${isExpanded ? 'opacity-100 h-8 translate-y-0' : 'opacity-0 h-0 translate-y-2 overflow-hidden'}">
+            <div class="transition-all duration-300 ${isButtonVisible ? 'opacity-100 h-8 translate-y-0' : 'opacity-0 h-0 translate-y-2 overflow-hidden'}">
               <button 
                 id="play-btn-${id}"
                 onclick="event.stopPropagation(); window.playSong('${id}')" 
