@@ -1,0 +1,46 @@
+
+const REAL_SONGS = [
+  { title: "Blinding Lights", artist: "The Weeknd" },
+  { title: "Levitating", artist: "Dua Lipa" },
+  { title: "Stay", artist: "The Kid LAROI & Justin Bieber" },
+  { title: "Shape of You", artist: "Ed Sheeran" },
+  { title: "Bad Guy", artist: "Billie Eilish" },
+  { title: "Save Your Tears", artist: "The Weeknd" },
+  { title: "Peaches", artist: "Justin Bieber" },
+  { title: "Montero", artist: "Lil Nas X" },
+  { title: "Drivers License", artist: "Olivia Rodrigo" },
+  { title: "Good 4 U", artist: "Olivia Rodrigo" },
+  { title: "Heat Waves", artist: "Glass Animals" },
+  { title: "Industry Baby", artist: "Lil Nas X" },
+  { title: "Kiss Me More", artist: "Doja Cat" },
+  { title: "Leave The Door Open", artist: "Silk Sonic" },
+  { title: "Butter", artist: "BTS" },
+  { title: "Dynamite", artist: "BTS" },
+  { title: "Watermelon Sugar", artist: "Harry Styles" },
+  { title: "Say So", artist: "Doja Cat" },
+  { title: "Rockstar", artist: "Post Malone" },
+  { title: "Circles", artist: "Post Malone" },
+  { title: "Sunflower", artist: "Post Malone" },
+  { title: "Old Town Road", artist: "Lil Nas X" },
+  { title: "Uptown Funk", artist: "Mark Ronson" },
+  { title: "Closer", artist: "The Chainsmokers" },
+  { title: "Starboy", artist: "The Weeknd" },
+  { title: "One Dance", artist: "Drake" },
+  { title: "God's Plan", artist: "Drake" },
+  { title: "Lucid Dreams", artist: "Juiceworld" },
+  { title: "Someone You Loved", artist: "Lewis Capaldi" },
+  { title: "Dance Monkey", artist: "Tones and I" }
+];
+
+export const MOCK_SONGS = REAL_SONGS.map((data, i) => ({
+  id: `song-${i}`,
+  title: data.title,
+  artist: data.artist,
+  level: (i % 6) + 1,
+  score: Math.floor(Math.random() * 20000),
+  playCount: `${Math.floor(Math.random() * 50)}K`,
+  coverUrl: `https://picsum.photos/seed/song${i}/400/400`,
+  starLevel: 0,
+  isSotd: i === 0,
+  isDeluxe: i % 4 === 0
+}));

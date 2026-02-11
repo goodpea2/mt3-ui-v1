@@ -3,8 +3,8 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>RhythmStar UI Mockup</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>RhythmStar Simulation</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
       @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&display=swap');
@@ -15,6 +15,9 @@
         color: white;
         margin: 0;
         overflow: hidden;
+        user-select: none;
+        -webkit-user-select: none;
+        touch-action: pan-y;
       }
 
       .mobile-container {
@@ -31,24 +34,33 @@
         border-right: 1px solid rgba(255, 255, 255, 0.05);
       }
 
-      /* Custom scrollbar */
-      .no-scrollbar::-webkit-scrollbar {
-        display: none;
+      .no-scrollbar::-webkit-scrollbar { display: none; }
+      .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+      .fancy-outline-container {
+        position: relative;
+        z-index: 10;
       }
-      .no-scrollbar {
-        -ms-overflow-style: none;
-        scrollbar-width: none;
+      .fancy-outline-container::before {
+        content: '';
+        position: absolute;
+        inset: -2px;
+        background: linear-gradient(90deg, #ff00ff, #00ffff, #ff00ff);
+        background-size: 200% auto;
+        border-radius: 1.25rem;
+        z-index: -1;
+        animation: border-flow 2s linear infinite;
+        opacity: 1;
+        box-shadow: 0 0 15px rgba(255, 0, 255, 0.5), 0 0 8px rgba(0, 255, 255, 0.3);
+      }
+      
+      @keyframes border-flow {
+        0% { background-position: 0% center; }
+        100% { background-position: 200% center; }
       }
 
-      ::-webkit-scrollbar {
-        width: 4px;
-      }
-      ::-webkit-scrollbar-track {
-        background: transparent;
-      }
-      ::-webkit-scrollbar-thumb {
-        background: #4a2d8a;
-        border-radius: 10px;
+      .song-card {
+        transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
       }
 
       .halftone-bg {
@@ -56,39 +68,61 @@
         background-size: 8px 8px;
       }
 
-      .neon-border {
-        box-shadow: 0 0 10px rgba(255, 0, 255, 0.2);
+      @keyframes pulse-play {
+        0%, 100% { transform: scale(1); box-shadow: 0 4px 10px rgba(255, 0, 255, 0.3); }
+        50% { transform: scale(1.03); box-shadow: 0 6px 15px rgba(255, 0, 255, 0.5); }
       }
+      .play-btn-vfx { animation: pulse-play 2s infinite ease-in-out; }
 
-      .btn-play-shadow {
-        box-shadow: 0 4px 0 rgba(150, 0, 150, 1);
-      }
-      .btn-play-shadow:active {
-        box-shadow: none;
-        transform: translateY(2px);
-      }
-
+      .glow-orb { animation: pulse-glow 6s infinite ease-in-out; }
       @keyframes pulse-glow {
-        0%, 100% { opacity: 0.2; }
-        50% { opacity: 0.4; }
+        0%, 100% { opacity: 0.1; transform: scale(1); }
+        50% { opacity: 0.25; transform: scale(1.1); }
       }
 
-      .glow-orb {
-        animation: pulse-glow 4s infinite ease-in-out;
+      /* Particles animation */
+      .particle {
+        position: fixed;
+        pointer-events: none;
+        z-index: 100;
+        animation: fly-particle 0.8s cubic-bezier(0.1, 0.8, 0.4, 1.0) forwards;
+      }
+      @keyframes fly-particle {
+        0% { transform: scale(0.5); opacity: 0; }
+        20% { opacity: 1; }
+        100% { transform: translate(var(--tx), var(--ty)) scale(1.2); opacity: 0; }
+      }
+
+      .reward-popup {
+        animation: slide-up-fade 0.8s ease-out forwards;
+      }
+      @keyframes slide-up-fade {
+        0% { opacity: 0; transform: translateY(0); }
+        20% { opacity: 1; }
+        100% { opacity: 0; transform: translateY(-30px); }
+      }
+
+      /* Deluxe expanded sparkle overlay */
+      .deluxe-sparkle {
+        position: absolute;
+        inset: 0;
+        background-image: radial-gradient(circle at 20% 30%, rgba(255,215,0,0.1) 0%, transparent 40%),
+                          radial-gradient(circle at 80% 70%, rgba(255,215,0,0.1) 0%, transparent 40%);
+        pointer-events: none;
       }
     </style>
   </head>
   <body>
     <div id="app" class="flex justify-center">
       <div class="mobile-container">
-        <!-- Background Orbs -->
         <div class="glow-orb absolute top-[-10%] left-[-10%] w-64 h-64 bg-purple-600 rounded-full blur-[100px] pointer-events-none"></div>
         <div class="glow-orb absolute bottom-[20%] right-[-10%] w-64 h-64 bg-pink-600 rounded-full blur-[100px] pointer-events-none"></div>
 
         <div id="header-root"></div>
-        <div id="tabs-root"></div>
-        <div id="content-root" class="flex-1 overflow-y-auto px-4 pt-2 pb-32 space-y-4 no-scrollbar"></div>
-        <div id="nav-root"></div>
+        <div id="tabs-root" class="z-20"></div>
+        <div id="content-root" class="flex-1 overflow-y-auto px-4 pt-4 pb-40 space-y-4 no-scrollbar" style="scroll-behavior: smooth; -webkit-overflow-scrolling: touch;"></div>
+        <div id="nav-root" class="z-50"></div>
+        <div id="popup-layer" class="absolute inset-0 pointer-events-none flex items-center justify-center z-40"></div>
       </div>
     </div>
     <script type="module" src="index.js"></script>
