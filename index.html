@@ -107,14 +107,23 @@
       }
 
       .debug-input {
-        @apply bg-black/40 border border-white/10 rounded p-1.5 text-white text-[10px] font-black outline-none focus:border-cyan-500 w-full;
+        @apply bg-purple-900/40 border border-purple-500/30 rounded p-1.5 text-white text-[10px] font-black outline-none focus:border-cyan-500 w-full;
       }
       
       .debug-label {
         @apply text-[8px] font-bold text-white/40 uppercase mb-0.5;
       }
+
+      @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+      @keyframes fade-out { from { opacity: 1; } to { opacity: 0; } }
+      @keyframes zoom-in { from { transform: scale(0.95); } to { transform: scale(1); } }
+      @keyframes zoom-out { from { transform: scale(1); } to { transform: scale(0.95); } }
+      
+      .animate-in { animation: fade-in 0.3s ease-out, zoom-in 0.3s ease-out; }
+      .animate-out { animation: fade-out 0.2s ease-in, zoom-out 0.2s ease-in; }
     </style>
-  </head>
+  <link rel="stylesheet" href="/index.css">
+</head>
   <body>
     <div id="app" class="flex justify-center">
       <div class="mobile-container">
@@ -132,5 +141,6 @@
       </div>
     </div>
     <script type="module" src="index.js"></script>
-  </body>
+  <script type="module" src="/index.tsx"></script>
+</body>
 </html>

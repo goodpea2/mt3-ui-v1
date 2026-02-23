@@ -8,7 +8,7 @@ export const MOCK_SONGS = [
     score: 18450,
     playCount: "42K",
     coverUrl: "https://picsum.photos/seed/song0/400/400",
-    starLevel: 3,
+    starLevel: 0,
     isSotd: true,
     isDeluxe: false,
     isLocked: false,

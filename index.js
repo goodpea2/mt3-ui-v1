@@ -1,8 +1,10 @@
 
 import { getSongCardHtml } from './SongCard.js';
 import { MOCK_SONGS } from './songs.js';
-import { getXpRequired, setXpRequired, LEVEL_BALANCING, DYNAMIC_SONG_CONFIG } from './balance.js';
+import { getXpRequired, setXpRequired, LEVEL_BALANCING, DYNAMIC_SONG_CONFIG, PLAY_STAT } from './balance.js';
 import { VFXManager } from './vfx/Manager.js';
+import { simulatePlay } from './simulation.js';
+import { showPlayStatsPopup } from './PlayStatsPopup.js';
 
 // --- Simulation State ---
 const state = {
@@ -25,7 +27,10 @@ const state = {
     totalPlayCount: 0,
     totalXpGained: 0,
     totalCoinGained: 0,
-    totalCoinSpent: 0
+    totalCoinSpent: 0,
+    totalTimeSpentPlaying: 0,
+    totalTimeSpentWatchingAd: 0,
+    totalAdCount: 0
   },
   songs: MOCK_SONGS,
   expandedSongId: 'song-0',
@@ -153,6 +158,25 @@ window.toggleDebugSection = (section) => {
   renderDebug();
 };
 
+window.updatePlayStat = (path, val, isArray = false, index = -1) => {
+  const parts = path.split('.');
+  let target = PLAY_STAT;
+  for (let i = 0; i < parts.length - 1; i++) {
+    target = target[parts[i]];
+  }
+  const lastKey = parts[parts.length - 1];
+  
+  if (isArray && index !== -1) {
+    target[lastKey][index] = parseFloat(val) || 0;
+  } else if (isArray) {
+    // Handle comma separated string for arrays
+    target[lastKey] = val.split(',').map(v => parseFloat(v.trim()) || 0);
+  } else {
+    target[lastKey] = parseFloat(val) || 0;
+  }
+  renderDebug();
+};
+
 // --- Game Actions ---
 
 window.toggleExpand = (id) => {
@@ -224,45 +248,59 @@ window.playSong = (id) => {
   const song = state.songs.find(s => s.id === id);
   if (!song || song.isLocked) return;
 
-  const xpGained = Math.floor(Math.random() * (state.gameConfig.maxXp - state.gameConfig.minXp + 1)) + state.gameConfig.minXp; 
-  const coinsGained = Math.floor(Math.random() * (state.gameConfig.maxCoins - state.gameConfig.minCoins + 1)) + state.gameConfig.minCoins; 
-  const starGained = Math.floor(Math.random() * 2) + 1;   
+  // Use the new simulation engine
+  const stats = simulatePlay(song.starLevel);
 
-  const btn = document.getElementById(`play-btn-${id}`);
-  const targetXp = document.getElementById('xp-target');
-  const targetCoins = document.getElementById('coins-target');
-  
-  if (btn && targetXp && targetCoins) {
-    const startRect = btn.getBoundingClientRect();
+  showPlayStatsPopup(song, stats, () => {
+    // Apply rewards after popup is dismissed
+    const xpGained = stats.totalXp;
+    const coinsGained = stats.totalCoins;
 
-    VFXManager.spawnRewards('xp', xpGained, startRect, targetXp, (increment) => {
-      state.visualUser.xp += increment;
-      checkLevelUpVisual();
-      renderHeader();
-    });
+    const btn = document.getElementById(`play-btn-${id}`);
+    const targetXp = document.getElementById('xp-target');
+    const targetCoins = document.getElementById('coins-target');
+    
+    if (btn && targetXp && targetCoins) {
+      const startRect = btn.getBoundingClientRect();
 
-    VFXManager.spawnRewards('coin', coinsGained, startRect, targetCoins, (increment) => {
-      state.visualUser.coins += increment;
-      renderHeader();
-    });
-  }
+      VFXManager.spawnRewards('xp', xpGained, startRect, targetXp, (increment) => {
+        state.visualUser.xp += increment;
+        checkLevelUpVisual();
+        renderHeader();
+      });
 
-  song.starLevel = Math.min(6, song.starLevel + starGained);
-  song.score += Math.floor(Math.random() * 500) + 500;
-  
-  state.user.xp += xpGained;
-  state.user.coins += coinsGained;
-  state.stats.totalPlayCount++;
-  state.stats.totalXpGained += xpGained;
-  state.stats.totalCoinGained += coinsGained;
+      VFXManager.spawnRewards('coin', coinsGained, startRect, targetCoins, (increment) => {
+        state.visualUser.coins += increment;
+        renderHeader();
+      });
+    }
 
-  while (state.user.xp >= getXpRequired(state.user.level)) {
-    state.user.xp -= getXpRequired(state.user.level);
-    state.user.level += 1;
-  }
-  
-  renderContent();
-  if (state.debugMode) renderDebug();
+    // Update song state
+    song.starLevel = Math.max(song.starLevel, stats.starLevel);
+    song.score += Math.floor(Math.random() * 500) + 500;
+    
+    // Update user state
+    state.user.xp += xpGained;
+    state.user.coins += coinsGained;
+    state.stats.totalPlayCount++;
+    state.stats.totalXpGained += xpGained;
+    state.stats.totalCoinGained += coinsGained;
+    
+    // Update time stats
+    state.stats.totalTimeSpentPlaying += stats.effectiveSongDuration;
+    state.stats.totalTimeSpentWatchingAd += stats.adDuration;
+    if (stats.adDuration > 0) {
+      state.stats.totalAdCount += (stats.starLevel >= 4 ? 2 : 1);
+    }
+
+    while (state.user.xp >= getXpRequired(state.user.level)) {
+      state.user.xp -= getXpRequired(state.user.level);
+      state.user.level += 1;
+    }
+    
+    renderContent();
+    if (state.debugMode) renderDebug();
+  });
 };
 
 function checkLevelUpVisual() {
@@ -406,7 +444,7 @@ function renderDebug() {
   const cheatBtnClass = "bg-gradient-to-b from-cyan-400 to-blue-500 text-white font-black italic text-[9px] px-3 py-2 rounded-xl border-b-2 border-blue-900 active:border-b-0 active:translate-y-[1px] transition-all shadow-md uppercase text-center";
 
   container.innerHTML = `
-    <div class="pointer-events-auto w-full h-[98vh] bg-[#0c051d] border-b border-white/20 overflow-y-auto no-scrollbar p-4 flex flex-col gap-4">
+    <div class="pointer-events-auto w-full h-[98vh] bg-[#0c051d] border-b border-white/20 overflow-y-auto no-scrollbar p-4 flex flex-col gap-4 pb-20">
       <!-- Close Trigger -->
       <div class="flex justify-end shrink-0">
         <button onclick="window.toggleDebug()" class="bg-red-500 text-white font-black px-3 py-1 rounded text-[10px]">CLOSE</button>
@@ -418,6 +456,9 @@ function renderDebug() {
          <p>Total XP gained: ${state.stats.totalXpGained.toLocaleString()}</p>
          <p>Total Coin gained: ${state.stats.totalCoinGained.toLocaleString()}</p>
          <p>Total Coin spent: ${state.stats.totalCoinSpent.toLocaleString()}</p>
+         <p class="text-purple-400 mt-1">Total Time Playing: ${Math.floor(state.stats.totalTimeSpentPlaying / 60)}m ${state.stats.totalTimeSpentPlaying % 60}s</p>
+         <p class="text-purple-400">Total Time Ads: ${Math.floor(state.stats.totalTimeSpentWatchingAd / 60)}m ${state.stats.totalTimeSpentWatchingAd % 60}s</p>
+         <p class="text-purple-400">Total Ads Watched: ${state.stats.totalAdCount}</p>
       </div>
 
       <!-- Cheat Buttons -->
@@ -463,39 +504,89 @@ function renderDebug() {
       <!-- Play Config -->
       <div class="p-3 bg-white/5 rounded-lg border border-white/10 flex flex-col">
         <div class="flex justify-between items-center mb-1 shrink-0">
-          <h3 class="text-white text-[10px] font-black uppercase tracking-tighter">Play Config (Rewards)</h3>
+          <h3 class="text-white text-[10px] font-black uppercase tracking-tighter">Play Config (Simulation)</h3>
           <button onclick="window.toggleDebugSection('play')" class="text-[8px] font-black bg-cyan-500/20 text-cyan-400 px-2 py-1 rounded border border-cyan-500/30">CONFIG</button>
         </div>
         ${state.debugSections.play ? `
-          <div class="grid grid-cols-2 gap-2 mt-2">
-            <div>
-              <p class="debug-label">Min XP</p>
-              <input type="number" value="${state.gameConfig.minXp}" oninput="window.updateBalancing('minXp', this.value)" class="debug-input" />
+          <div class="space-y-4 mt-2 pr-1">
+            <!-- Star Config -->
+            <div class="space-y-2">
+              <p class="text-white/40 text-[8px] font-bold uppercase border-b border-white/5 pb-1">Star Config</p>
+              <div class="grid grid-cols-1 gap-2">
+                <div>
+                  <p class="debug-label">Weights for Stars (0-6)</p>
+                  <input type="text" value="${PLAY_STAT.starConfig.weightForStars.join(', ')}" onchange="window.updatePlayStat('starConfig.weightForStars', this.value, true)" class="debug-input" />
+                </div>
+                <div>
+                  <p class="debug-label">Coins for New Star (0-5)</p>
+                  <input type="text" value="${PLAY_STAT.starConfig.coinForNewStar.join(', ')}" onchange="window.updatePlayStat('starConfig.coinForNewStar', this.value, true)" class="debug-input" />
+                </div>
+                <div>
+                  <p class="debug-label">Coins for Repeated Star (0-5)</p>
+                  <input type="text" value="${PLAY_STAT.starConfig.coinForRepeatedStar.join(', ')}" onchange="window.updatePlayStat('starConfig.coinForRepeatedStar', this.value, true)" class="debug-input" />
+                </div>
+              </div>
             </div>
-            <div>
-              <p class="debug-label">Max XP</p>
-              <input type="number" value="${state.gameConfig.maxXp}" oninput="window.updateBalancing('maxXp', this.value)" class="debug-input" />
+
+            <!-- Note Config -->
+            <div class="space-y-2">
+              <p class="text-white/40 text-[8px] font-bold uppercase border-b border-white/5 pb-1">Note Config</p>
+              <div class="grid grid-cols-1 gap-2">
+                <div>
+                  <p class="debug-label">Note Count Min (0-6)</p>
+                  <input type="text" value="${PLAY_STAT.noteConfig.noteCountMin.join(', ')}" onchange="window.updatePlayStat('noteConfig.noteCountMin', this.value, true)" class="debug-input" />
+                </div>
+                <div>
+                  <p class="debug-label">Note Count Max (0-6)</p>
+                  <input type="text" value="${PLAY_STAT.noteConfig.noteCountMax.join(', ')}" onchange="window.updatePlayStat('noteConfig.noteCountMax', this.value, true)" class="debug-input" />
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                  <div>
+                    <p class="debug-label">XP Per Accuracy (P,G,G)</p>
+                    <input type="text" value="${PLAY_STAT.noteConfig.xpPerAccuracy.join(', ')}" onchange="window.updatePlayStat('noteConfig.xpPerAccuracy', this.value, true)" class="debug-input" />
+                  </div>
+                  <div>
+                    <p class="debug-label">Guaranteed XP</p>
+                    <input type="number" value="${PLAY_STAT.guaranteedXpPerPlay}" oninput="window.updatePlayStat('guaranteedXpPerPlay', this.value)" class="debug-input" />
+                  </div>
+                </div>
+              </div>
             </div>
-            <div>
-              <p class="debug-label">Min Coin</p>
-              <input type="number" value="${state.gameConfig.minCoins}" oninput="window.updateBalancing('minCoins', this.value)" class="debug-input" />
-            </div>
-            <div>
-              <p class="debug-label">Max Coin</p>
-              <input type="number" value="${state.gameConfig.maxCoins}" oninput="window.updateBalancing('maxCoins', this.value)" class="debug-input" />
+
+            <!-- Global Durations -->
+            <div class="space-y-2">
+              <p class="text-white/40 text-[8px] font-bold uppercase border-b border-white/5 pb-1">Durations & Rewards</p>
+              <div class="grid grid-cols-2 gap-2">
+                <div>
+                  <p class="debug-label">Song Dur (Min,Max)</p>
+                  <input type="text" value="${PLAY_STAT.songDuration.join(', ')}" onchange="window.updatePlayStat('songDuration', this.value, true)" class="debug-input" />
+                </div>
+                <div>
+                  <p class="debug-label">Ad Dur (Min,Max)</p>
+                  <input type="text" value="${PLAY_STAT.adDuration.join(', ')}" onchange="window.updatePlayStat('adDuration', this.value, true)" class="debug-input" />
+                </div>
+                <div>
+                  <p class="debug-label">Idle Dur (Min,Max)</p>
+                  <input type="text" value="${PLAY_STAT.idleDuration.join(', ')}" onchange="window.updatePlayStat('idleDuration', this.value, true)" class="debug-input" />
+                </div>
+                <div>
+                  <p class="debug-label">Guaranteed Coins (Min,Max)</p>
+                  <input type="text" value="${PLAY_STAT.guaranteedCoins.join(', ')}" onchange="window.updatePlayStat('guaranteedCoins', this.value, true)" class="debug-input" />
+                </div>
+              </div>
             </div>
           </div>
         ` : ''}
       </div>
 
       <!-- XP Level Config -->
-      <div class="p-3 bg-white/5 rounded-lg border border-white/10 flex flex-col flex-1 overflow-hidden">
+      <div class="p-3 bg-white/5 rounded-lg border border-white/10 flex flex-col shrink-0">
         <div class="flex justify-between items-center mb-1 shrink-0">
           <h3 class="text-white text-[10px] font-black uppercase tracking-tighter">XP Level Config</h3>
           <button onclick="window.toggleDebugSection('xp')" class="text-[8px] font-black bg-cyan-500/20 text-cyan-400 px-2 py-1 rounded border border-cyan-500/30">CONFIG</button>
         </div>
         ${state.debugSections.xp ? `
-          <div class="grid grid-cols-2 gap-x-4 gap-y-2 overflow-y-auto no-scrollbar pr-1 mt-2">
+          <div class="grid grid-cols-2 gap-x-4 gap-y-2 pr-1 mt-2">
             ${LEVEL_BALANCING.map((xp, i) => `
               <div class="flex items-center justify-between gap-2">
                 <span class="text-white/40 font-black text-[8px] w-6 shrink-0">LV.${i+1}</span>
@@ -503,7 +594,7 @@ function renderDebug() {
               </div>
             `).join('')}
           </div>
-        ` : '<div class="flex-1"></div>'}
+        ` : ''}
       </div>
     </div>
   `;

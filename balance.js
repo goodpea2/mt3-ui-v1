@@ -38,3 +38,23 @@ export function setXpRequired(levelIndex, value) {
     LEVEL_BALANCING[levelIndex] = value;
   }
 }
+
+export const PLAY_STAT = {
+  starConfig: {
+    weightForStars: [1, 2, 4, 3, 0.2, 0.3, 0.4], // weights for each star level (0 to 6)
+    coinForNewStar: [50, 50, 50, 50, 50, 50], // coins rewarded for each new star gained
+    coinForRepeatedStar: [20, 20, 20, 20, 20, 20], // coins rewarded for repeated stars at each level
+  },
+  guaranteedCoins: [60, 70], // guaranteed coin reward (min/max) for each play regardless of stars
+  songDuration: [90, 150], // duration range (min/max)
+  adDuration: [30, 75], // duration range (min/max)
+  idleDuration: [15, 30], // duration range (min/max)
+
+  noteConfig: {
+    noteCountMin: [0, 30, 60, 90, 135, 180, 270], // minimum note count for each star level (0 to 6)
+    noteCountMax: [0, 70, 140, 210, 315, 420, 630], // maximum note count for each star level (0 to 6)
+    weightForAccuracy: [10, 15, 10], // weights for Perfect, Great, Good accuracy levels
+    xpPerAccuracy: [2, 1, 1], // XP rewarded for each note hit at Perfect, Great, Good accuracy levels
+  },
+  guaranteedXpPerPlay: 25, // guaranteed XP reward for each play regardless of stars
+};
