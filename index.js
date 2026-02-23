@@ -132,6 +132,15 @@ window.resetToLevel1 = () => {
   if (state.debugMode) renderDebug();
 };
 
+window.resetAllCounters = () => {
+  state.stats.totalTimeSpentPlaying = 0;
+  state.stats.totalTimeSpentWatchingAd = 0;
+  state.stats.totalPlayCount = 0;
+  state.stats.totalAdCount = 0;
+  showPopup("COUNTERS RESET", "text-orange-400 font-black");
+  if (state.debugMode) renderDebug();
+};
+
 window.updateBalancing = (key, val) => {
   state.gameConfig[key] = parseInt(val) || 0;
 };
@@ -249,7 +258,7 @@ window.playSong = (id) => {
   if (!song || song.isLocked) return;
 
   // Use the new simulation engine
-  const stats = simulatePlay(song.starLevel);
+  const stats = simulatePlay(song);
 
   showPlayStatsPopup(song, stats, () => {
     // Apply rewards after popup is dismissed
@@ -467,7 +476,8 @@ function renderDebug() {
         <button onclick="window.add1000Coins()" class="${cheatBtnClass}">Add 1000 Coins</button>
         <button onclick="window.unlockAllSongs()" class="${cheatBtnClass}">Unlock All Songs</button>
         <button onclick="window.lockAllSongs()" class="${cheatBtnClass}">Lock All Songs</button>
-        <button onclick="window.resetToLevel1()" class="col-span-2 ${cheatBtnClass}">Reset XP Level</button>
+        <button onclick="window.resetToLevel1()" class="${cheatBtnClass}">Reset XP Level</button>
+        <button onclick="window.resetAllCounters()" class="${cheatBtnClass}">Reset Counters</button>
       </div>
 
       <!-- Dynamic Pricing Config -->
@@ -518,11 +528,11 @@ function renderDebug() {
                   <input type="text" value="${PLAY_STAT.starConfig.weightForStars.join(', ')}" onchange="window.updatePlayStat('starConfig.weightForStars', this.value, true)" class="debug-input" />
                 </div>
                 <div>
-                  <p class="debug-label">Coins for New Star (0-5)</p>
+                  <p class="debug-label">Extra coins for New Star (0-5)</p>
                   <input type="text" value="${PLAY_STAT.starConfig.coinForNewStar.join(', ')}" onchange="window.updatePlayStat('starConfig.coinForNewStar', this.value, true)" class="debug-input" />
                 </div>
                 <div>
-                  <p class="debug-label">Coins for Repeated Star (0-5)</p>
+                  <p class="debug-label">Extra coins for Repeated Star (0-5)</p>
                   <input type="text" value="${PLAY_STAT.starConfig.coinForRepeatedStar.join(', ')}" onchange="window.updatePlayStat('starConfig.coinForRepeatedStar', this.value, true)" class="debug-input" />
                 </div>
               </div>
@@ -546,8 +556,29 @@ function renderDebug() {
                     <input type="text" value="${PLAY_STAT.noteConfig.xpPerAccuracy.join(', ')}" onchange="window.updatePlayStat('noteConfig.xpPerAccuracy', this.value, true)" class="debug-input" />
                   </div>
                   <div>
-                    <p class="debug-label">Guaranteed XP</p>
-                    <input type="number" value="${PLAY_STAT.guaranteedXpPerPlay}" oninput="window.updatePlayStat('guaranteedXpPerPlay', this.value)" class="debug-input" />
+                    <p class="debug-label">Guaranteed XP (Min,Max)</p>
+                    <input type="text" value="${PLAY_STAT.guaranteedXpPerPlay.join(', ')}" onchange="window.updatePlayStat('guaranteedXpPerPlay', this.value, true)" class="debug-input" />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- XP Multipliers -->
+            <div class="space-y-2">
+              <p class="text-white/40 text-[8px] font-bold uppercase border-b border-white/5 pb-1">XP Multipliers</p>
+              <div class="grid grid-cols-1 gap-2">
+                <div>
+                  <p class="debug-label">Difficulty XP Bonus (1-6)</p>
+                  <input type="text" value="${PLAY_STAT.songDifficultyXpBonus.join(', ')}" onchange="window.updatePlayStat('songDifficultyXpBonus', this.value, true)" class="debug-input" />
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                  <div>
+                    <p class="debug-label">Deluxe XP Bonus</p>
+                    <input type="number" step="0.1" value="${PLAY_STAT.songDeluxeXpBonus}" oninput="window.updatePlayStat('songDeluxeXpBonus', this.value)" class="debug-input" />
+                  </div>
+                  <div>
+                    <p class="debug-label">SotD XP Bonus</p>
+                    <input type="number" step="0.1" value="${PLAY_STAT.songOfTheDayXpBonus}" oninput="window.updatePlayStat('songOfTheDayXpBonus', this.value)" class="debug-input" />
                   </div>
                 </div>
               </div>

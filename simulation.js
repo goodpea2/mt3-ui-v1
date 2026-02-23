@@ -1,8 +1,9 @@
 
 import { PLAY_STAT } from './balance.js';
 
-export function simulatePlay(currentStarLevel = 0) {
-  const { starConfig, guaranteedCoins, songDuration, adDuration, idleDuration, noteConfig, guaranteedXpPerPlay } = PLAY_STAT;
+export function simulatePlay(song) {
+  const currentStarLevel = song.starLevel || 0;
+  const { starConfig, guaranteedCoins, songDuration, adDuration, idleDuration, noteConfig, guaranteedXpPerPlay, songDifficultyXpBonus, songDeluxeXpBonus, songOfTheDayXpBonus } = PLAY_STAT;
 
   // 1. Determine Star Level
   const starLevel = weightedRandom(starConfig.weightForStars);
@@ -36,7 +37,29 @@ export function simulatePlay(currentStarLevel = 0) {
   const xpFromNotes = (perfectCount * noteConfig.xpPerAccuracy[0]) + 
                       (greatCount * noteConfig.xpPerAccuracy[1]) + 
                       (goodCount * noteConfig.xpPerAccuracy[2]);
-  const totalXp = xpFromNotes + guaranteedXpPerPlay;
+  
+  const baseGuaranteedXp = Math.floor(Math.random() * (guaranteedXpPerPlay[1] - guaranteedXpPerPlay[0] + 1)) + guaranteedXpPerPlay[0];
+  
+  let totalXp = xpFromNotes + baseGuaranteedXp;
+
+  // Apply Multipliers
+  let multiplier = 1.0;
+  
+  // Difficulty Bonus (level is 1-indexed, array is 0-indexed)
+  const diffIndex = Math.min(song.level - 1, songDifficultyXpBonus.length - 1);
+  multiplier += songDifficultyXpBonus[diffIndex];
+
+  // Deluxe Bonus
+  if (song.isDeluxe) {
+    multiplier += songDeluxeXpBonus;
+  }
+
+  // SotD Bonus
+  if (song.isSotd) {
+    multiplier += songOfTheDayXpBonus;
+  }
+
+  totalXp = Math.round(totalXp * multiplier);
 
   // 5. Coin Calculation
   const baseCoins = Math.floor(Math.random() * (guaranteedCoins[1] - guaranteedCoins[0] + 1)) + guaranteedCoins[0];
