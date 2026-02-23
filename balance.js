@@ -56,7 +56,7 @@ export const PLAY_STAT = {
     weightForAccuracy: [10, 15, 10], // weights for Perfect, Great, Good accuracy levels
     xpPerAccuracy: [2, 1, 1], // XP rewarded for each note hit at Perfect, Great, Good accuracy levels
   },
-  guaranteedXpPerPlay: [25, 50], // guaranteed XP reward (min/max) for each play regardless of stars
+  guaranteedXpPerPlay: [0, 0], // guaranteed XP reward (min/max) for each play regardless of stars
   songDifficultyXpBonus: [0, 0.1, 0.2, 0.3, 0.4, 0.5], // multiplier added for XP based on song difficulty (1 to 6)
   songDeluxeXpBonus: 0.5, // multiplier added as bonus XP if the song is deluxe version
   songOfTheDayXpBonus: 1.0, // multiplier added as bonus XP if the song is sotd

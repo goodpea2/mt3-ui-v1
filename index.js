@@ -528,11 +528,11 @@ function renderDebug() {
                   <input type="text" value="${PLAY_STAT.starConfig.weightForStars.join(', ')}" onchange="window.updatePlayStat('starConfig.weightForStars', this.value, true)" class="debug-input" />
                 </div>
                 <div>
-                  <p class="debug-label">Extra coins for New Star (0-5)</p>
+                  <p class="debug-label">Extra coins for New Star (1-6)</p>
                   <input type="text" value="${PLAY_STAT.starConfig.coinForNewStar.join(', ')}" onchange="window.updatePlayStat('starConfig.coinForNewStar', this.value, true)" class="debug-input" />
                 </div>
                 <div>
-                  <p class="debug-label">Extra coins for Repeated Star (0-5)</p>
+                  <p class="debug-label">Base coins for Repeated Star (1-6)</p>
                   <input type="text" value="${PLAY_STAT.starConfig.coinForRepeatedStar.join(', ')}" onchange="window.updatePlayStat('starConfig.coinForRepeatedStar', this.value, true)" class="debug-input" />
                 </div>
               </div>
@@ -543,20 +543,20 @@ function renderDebug() {
               <p class="text-white/40 text-[8px] font-bold uppercase border-b border-white/5 pb-1">Note Config</p>
               <div class="grid grid-cols-1 gap-2">
                 <div>
-                  <p class="debug-label">Note Count Min (0-6)</p>
+                  <p class="debug-label">Note Count Min (0-6 stars)</p>
                   <input type="text" value="${PLAY_STAT.noteConfig.noteCountMin.join(', ')}" onchange="window.updatePlayStat('noteConfig.noteCountMin', this.value, true)" class="debug-input" />
                 </div>
                 <div>
-                  <p class="debug-label">Note Count Max (0-6)</p>
+                  <p class="debug-label">Note Count Max (0-6 stars)</p>
                   <input type="text" value="${PLAY_STAT.noteConfig.noteCountMax.join(', ')}" onchange="window.updatePlayStat('noteConfig.noteCountMax', this.value, true)" class="debug-input" />
                 </div>
                 <div class="grid grid-cols-2 gap-2">
                   <div>
-                    <p class="debug-label">XP Per Accuracy (P,G,G)</p>
+                    <p class="debug-label">XP Per Hit Accuracy (Pf,Gr,Go)</p>
                     <input type="text" value="${PLAY_STAT.noteConfig.xpPerAccuracy.join(', ')}" onchange="window.updatePlayStat('noteConfig.xpPerAccuracy', this.value, true)" class="debug-input" />
                   </div>
                   <div>
-                    <p class="debug-label">Guaranteed XP (Min,Max)</p>
+                    <p class="debug-label">Guaranteed XP Per Play (Min,Max)</p>
                     <input type="text" value="${PLAY_STAT.guaranteedXpPerPlay.join(', ')}" onchange="window.updatePlayStat('guaranteedXpPerPlay', this.value, true)" class="debug-input" />
                   </div>
                 </div>
@@ -568,7 +568,7 @@ function renderDebug() {
               <p class="text-white/40 text-[8px] font-bold uppercase border-b border-white/5 pb-1">XP Multipliers</p>
               <div class="grid grid-cols-1 gap-2">
                 <div>
-                  <p class="debug-label">Difficulty XP Bonus (1-6)</p>
+                  <p class="debug-label">Difficulty XP Bonus (diff 1-6)</p>
                   <input type="text" value="${PLAY_STAT.songDifficultyXpBonus.join(', ')}" onchange="window.updatePlayStat('songDifficultyXpBonus', this.value, true)" class="debug-input" />
                 </div>
                 <div class="grid grid-cols-2 gap-2">
@@ -589,19 +589,19 @@ function renderDebug() {
               <p class="text-white/40 text-[8px] font-bold uppercase border-b border-white/5 pb-1">Durations & Rewards</p>
               <div class="grid grid-cols-2 gap-2">
                 <div>
-                  <p class="debug-label">Song Dur (Min,Max)</p>
+                  <p class="debug-label">Song Duration (Min,Max)</p>
                   <input type="text" value="${PLAY_STAT.songDuration.join(', ')}" onchange="window.updatePlayStat('songDuration', this.value, true)" class="debug-input" />
                 </div>
                 <div>
-                  <p class="debug-label">Ad Dur (Min,Max)</p>
+                  <p class="debug-label">Ad Duration (Min,Max)</p>
                   <input type="text" value="${PLAY_STAT.adDuration.join(', ')}" onchange="window.updatePlayStat('adDuration', this.value, true)" class="debug-input" />
                 </div>
                 <div>
-                  <p class="debug-label">Idle Dur (Min,Max)</p>
+                  <p class="debug-label">Idle Duration (Min,Max)</p>
                   <input type="text" value="${PLAY_STAT.idleDuration.join(', ')}" onchange="window.updatePlayStat('idleDuration', this.value, true)" class="debug-input" />
                 </div>
                 <div>
-                  <p class="debug-label">Guaranteed Coins (Min,Max)</p>
+                  <p class="debug-label">Guaranteed Coins Per Play (Min,Max)</p>
                   <input type="text" value="${PLAY_STAT.guaranteedCoins.join(', ')}" onchange="window.updatePlayStat('guaranteedCoins', this.value, true)" class="debug-input" />
                 </div>
               </div>
