@@ -2,7 +2,7 @@
 import { VFX_CONFIG } from './Config.js';
 
 export class VFXManager {
-  static spawnRewards(type, amount, startRect, targetEl, onHitCallback) {
+  static spawnRewards(type, amount, startRect, targetEl, onHitCallback, onComplete) {
     const config = VFX_CONFIG[type];
     const count = Math.min(
       config.maxParticles, 
@@ -10,11 +10,18 @@ export class VFXManager {
     );
     
     const valuePerParticle = amount / count;
+    let landedCount = 0;
 
     for (let i = 0; i < count; i++) {
       const stagger = Math.random() * 400; 
       setTimeout(() => {
-        this.createParticle(type, startRect, targetEl, config, valuePerParticle, onHitCallback, false);
+        this.createParticle(type, startRect, targetEl, config, valuePerParticle, (val) => {
+          if (onHitCallback) onHitCallback(val);
+          landedCount++;
+          if (landedCount === count && onComplete) {
+            onComplete();
+          }
+        }, false);
       }, stagger);
     }
   }

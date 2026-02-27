@@ -1,0 +1,2 @@
+
+export const CATEGORIES = ['HOME', 'YOUR SONG', 'VIETNAM', 'KPOP', 'CLASSIC', 'ANIME', 'TIKTOK', 'WHATEVER'];

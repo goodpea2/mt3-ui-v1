@@ -1,24 +1,24 @@
 
 export const LEVEL_BALANCING = [
-  200, // Level 1 -> 2
-  200, // Level 2 -> 3
-  300, // Level 3 -> 4
-  300, // Level 4 -> 5
-  400, // Level 5 -> 6
-  400, // Level 6 -> 7
-  500, // Level 7 -> 8
-  500, // Level 8 -> 9
-  650, // Level 9 -> 10
-  650, // Level 10 -> 11
-  800, // Level 11 -> 12
-  800, // Level 12 -> 13
-  1000, // Level 13 -> 14
-  1000, // Level 14 -> 15
-  1300, // Level 15 -> 16
-  1300, // Level 16 -> 17
-  1600, // Level 17 -> 18
-  1600, // Level 18 -> 19
-  2000  // Level 19 -> 20
+  { xpRequired: 200, reward: { type: 'coin', amount: 250 } }, // Level 1 -> 2
+  { xpRequired: 200, reward: { type: 'song', amount: 1 } }, // Level 2 -> 3
+  { xpRequired: 300, reward: { type: 'coin', amount: 500 } }, // Level 3 -> 4
+  { xpRequired: 300, reward: { type: 'themeSet', amount: 1 } }, // Level 4 -> 5
+  { xpRequired: 400, reward: { type: 'coin', amount: 500 } }, // Level 5 -> 6
+  { xpRequired: 400, reward: { type: 'song', amount: 1 } }, // Level 6 -> 7
+  { xpRequired: 500, reward: { type: 'coin', amount: 500 } }, // Level 7 -> 8
+  { xpRequired: 500, reward: { type: 'song', amount: 1 } }, // Level 8 -> 9
+  { xpRequired: 650, reward: { type: 'noteSkin', amount: 1 } }, // Level 9 -> 10
+  { xpRequired: 650, reward: { type: 'coin', amount: 500 } }, // Level 10 -> 11
+  { xpRequired: 800, reward: { type: 'song', amount: 1 } }, // Level 11 -> 12
+  { xpRequired: 800, reward: { type: 'coin', amount: 500 } }, // Level 12 -> 13
+  { xpRequired: 1000, reward: { type: 'song', amount: 1 } }, // Level 13 -> 14
+  { xpRequired: 1000, reward: { type: 'themeSet', amount: 1 } }, // Level 14 -> 15
+  { xpRequired: 1300, reward: { type: 'coin', amount: 500 } }, // Level 15 -> 16
+  { xpRequired: 1300, reward: { type: 'song', amount: 1 } }, // Level 16 -> 17
+  { xpRequired: 1600, reward: { type: 'coin', amount: 500 } }, // Level 17 -> 18
+  { xpRequired: 1600, reward: { type: 'song', amount: 1 } }, // Level 18 -> 19
+  { xpRequired: 2000, reward: { type: 'noteSkin', amount: 500 } }  // Level 19 -> 20
 ];
 
 export const DYNAMIC_SONG_CONFIG = {
@@ -30,12 +30,29 @@ export const DYNAMIC_SONG_CONFIG = {
 
 export function getXpRequired(level) {
   const index = Math.min(level - 1, LEVEL_BALANCING.length - 1);
-  return LEVEL_BALANCING[index];
+  return LEVEL_BALANCING[index].xpRequired;
+}
+
+export function getLevelReward(level) {
+  const index = Math.max(0, Math.min(level - 2, LEVEL_BALANCING.length - 1));
+  return LEVEL_BALANCING[index].reward;
 }
 
 export function setXpRequired(levelIndex, value) {
   if (levelIndex >= 0 && levelIndex < LEVEL_BALANCING.length) {
-    LEVEL_BALANCING[levelIndex] = value;
+    LEVEL_BALANCING[levelIndex].xpRequired = value;
+  }
+}
+
+export function setLevelReward(levelIndex, type, amount, songId) {
+  if (levelIndex >= 0 && levelIndex < LEVEL_BALANCING.length) {
+    LEVEL_BALANCING[levelIndex].reward = { type, amount: parseInt(amount), songId };
+  }
+}
+
+export function setAllLevelBalancing(newData) {
+  if (Array.isArray(newData)) {
+    LEVEL_BALANCING.splice(0, LEVEL_BALANCING.length, ...newData);
   }
 }
 
