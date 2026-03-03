@@ -39,6 +39,42 @@ export class VFXManager {
     }
   }
 
+  static spawnFigureFly(imgUrl, startRect, targetEl, onComplete) {
+    const p = document.createElement('div');
+    p.style.position = 'fixed';
+    p.style.zIndex = '1000';
+    p.style.width = '40px';
+    p.style.height = '40px';
+    p.style.pointerEvents = 'none';
+    p.style.backgroundImage = `url(${imgUrl})`;
+    p.style.backgroundSize = 'contain';
+    p.style.backgroundRepeat = 'no-repeat';
+    p.style.backgroundPosition = 'center';
+    p.style.filter = 'drop-shadow(0 0 10px rgba(255,255,255,0.8))';
+    
+    const startX = startRect.left + startRect.width / 2 - 20;
+    const startY = startRect.top + startRect.height / 2 - 20;
+    p.style.left = `${startX}px`;
+    p.style.top = `${startY}px`;
+    
+    document.body.appendChild(p);
+
+    const targetRect = targetEl.getBoundingClientRect();
+    const tx = (targetRect.left + targetRect.width / 2) - (startX + 20);
+    const ty = (targetRect.top + targetRect.height / 2) - (startY + 20);
+
+    p.animate([
+      { transform: 'translate(0, 0) scale(1.5)', opacity: 1 },
+      { transform: `translate(${tx}px, ${ty}px) scale(0.2)`, opacity: 0 }
+    ], {
+      duration: 1000,
+      easing: 'cubic-bezier(0.4, 0, 0.2, 1)'
+    }).onfinish = () => {
+      p.remove();
+      if (onComplete) onComplete();
+    };
+  }
+
   static createParticle(type, start, target, config, value, onHit, isReverse = false) {
     const p = document.createElement('div');
     const size = 10;

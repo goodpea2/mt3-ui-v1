@@ -2,11 +2,11 @@
 export const LEVEL_BALANCING = [
   { xpRequired: 200, reward: { type: 'coin', amount: 250 } }, // Level 1 -> 2
   { xpRequired: 200, reward: { type: 'song', amount: 1 } }, // Level 2 -> 3
-  { xpRequired: 300, reward: { type: 'coin', amount: 500 } }, // Level 3 -> 4
+  { xpRequired: 300, reward: { type: 'coin', amount: 300 } }, // Level 3 -> 4
   { xpRequired: 300, reward: { type: 'themeSet', amount: 1 } }, // Level 4 -> 5
-  { xpRequired: 400, reward: { type: 'coin', amount: 500 } }, // Level 5 -> 6
+  { xpRequired: 400, reward: { type: 'coin', amount: 350 } }, // Level 5 -> 6
   { xpRequired: 400, reward: { type: 'song', amount: 1 } }, // Level 6 -> 7
-  { xpRequired: 500, reward: { type: 'coin', amount: 500 } }, // Level 7 -> 8
+  { xpRequired: 500, reward: { type: 'coin', amount: 400 } }, // Level 7 -> 8
   { xpRequired: 500, reward: { type: 'song', amount: 1 } }, // Level 8 -> 9
   { xpRequired: 650, reward: { type: 'noteSkin', amount: 1 } }, // Level 9 -> 10
   { xpRequired: 650, reward: { type: 'coin', amount: 500 } }, // Level 10 -> 11

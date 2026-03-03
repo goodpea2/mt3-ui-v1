@@ -42,6 +42,8 @@ export function renderDebug(state, getCurrentDynamicCost) {
         <button onclick="window.lockAllSongs()" class="${cheatBtnClass}">Lock All Songs</button>
         <button onclick="window.resetToLevel1()" class="${cheatBtnClass}">Reset XP Level</button>
         <button onclick="window.resetAllCounters()" class="${cheatBtnClass}">Reset Counters</button>
+        <button onclick="window.rewardAllFigures()" class="${cheatBtnClass}">Reward All Figures</button>
+        <button onclick="window.resetAllFigures()" class="${cheatBtnClass}">Reset All Figures</button>
       </div>
 
       <!-- Dynamic Pricing Config -->
@@ -182,7 +184,6 @@ export function renderDebug(state, getCurrentDynamicCost) {
         </div>
         ${state.debugSections.xp ? `
           <div class="flex flex-col gap-2 mt-2">
-            <p class="debug-label">Bulk Edit (Array of {xpRequired, reward: {type, amount, songId}})</p>
             <textarea 
               class="debug-input h-48 font-mono text-[8px] leading-tight whitespace-pre overflow-x-auto" 
               onchange="window.updateAllLevelBalancing(this.value)"

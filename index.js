@@ -6,6 +6,7 @@ import { VFXManager } from './vfx/Manager.js';
 import { simulatePlay } from './simulation.js';
 import { showPlayStatsPopup } from './ui/PlayStatsPopup.js';
 import { showLevelUpPopup } from './ui/LevelUpPopup.js';
+import { showGameplayScene } from './ui/GameplayScene.js';
 
 // UI Components
 import { renderHeader } from './ui/Header.js';
@@ -13,6 +14,10 @@ import { renderTabs } from './ui/Tabs.js';
 import { renderContent } from './ui/Content.js';
 import { renderNav } from './ui/Nav.js';
 import { renderDebug } from './ui/Debug.js';
+
+import { renderFigureCollection, showFigureFocus } from './ui/FigureCollection.js';
+import { FIGURES_DATA, SET_FIGURES_DATA } from './figures.js';
+import { playGiftOpenVFX } from './vfx/GiftOpen.js';
 
 // --- Helper Logic ---
 
@@ -31,13 +36,26 @@ function getSongCost(song) {
 
 const ui = {
   header: () => renderHeader(state),
-  tabs: () => renderTabs(state, (cat) => {
-    state.activeCategory = cat;
-    ui.tabs();
-    ui.content();
-  }),
-  content: () => renderContent(state, getSongCost),
-  nav: () => renderNav(),
+  tabs: () => {
+    if (state.activeCategory === 'FIGURES') {
+      const tabsRoot = document.getElementById('tabs-root');
+      if (tabsRoot) tabsRoot.innerHTML = ''; // Hide tabs in figures
+      return;
+    }
+    renderTabs(state, (cat) => {
+      state.activeCategory = cat;
+      ui.tabs();
+      ui.content();
+    });
+  },
+  content: () => {
+    if (state.activeCategory === 'FIGURES') {
+      renderFigureCollection(state);
+    } else {
+      renderContent(state, getSongCost);
+    }
+  },
+  nav: () => renderNav(state),
   debug: () => renderDebug(state, getCurrentDynamicCost),
   all: () => {
     ui.header();
@@ -46,6 +64,59 @@ const ui = {
     ui.nav();
     ui.debug();
   }
+};
+
+window.switchTab = (tab) => {
+  state.activeCategory = tab;
+  ui.all();
+};
+
+window.focusFigure = (id) => {
+  showFigureFocus(id, state);
+};
+
+window.unlockFigure = (id) => {
+  const fig = FIGURES_DATA.find(f => f.id === id);
+  if (!fig) return;
+  if (state.decoCoins < fig.decoCoinCost) {
+    showPopup("NOT ENOUGH DECO COINS", "text-pink-500 font-black");
+    return;
+  }
+  state.decoCoins -= fig.decoCoinCost;
+  state.unlockedFigures.add(id);
+  state.newlyUnlockedFigures.add(id);
+  
+  const overlay = document.getElementById('figure-focus-overlay');
+  if (overlay) overlay.remove();
+  
+  showPopup("FIGURE UNLOCKED!", "text-cyan-400 font-black");
+  ui.content();
+};
+
+window.collectSetReward = (setId) => {
+  const set = SET_FIGURES_DATA.find(s => s.id === setId);
+  if (!set) return;
+  state.collectedSetRewards.add(setId);
+  
+  if (set.reward.type === 'coin') {
+    window.addCoins(set.reward.amount);
+  }
+  
+  showPopup("SET REWARD COLLECTED!", "text-yellow-400 font-black");
+  ui.content();
+};
+
+window.addCoins = (amount) => {
+  const targetCoins = document.getElementById('coins-target');
+  if (targetCoins) {
+    const rect = targetCoins.getBoundingClientRect();
+    VFXManager.spawnRewards('coin', amount, { left: rect.left, top: window.innerHeight, width: rect.width, height: 0 }, targetCoins, (inc) => {
+      state.visualUser.coins += inc;
+      ui.header();
+    });
+  }
+  state.user.coins += amount;
+  state.stats.totalCoinGained += amount;
 };
 
 // --- Debug Actions ---
@@ -92,14 +163,26 @@ window.add1000Coins = () => {
 };
 
 window.unlockAllSongs = () => {
-  state.songs.forEach(s => s.isLocked = false);
+  state.songs.forEach(s => {
+    if (Array.isArray(s.isLocked)) {
+      s.isLocked = s.isLocked.map(() => false);
+    } else {
+      s.isLocked = false;
+    }
+  });
   showPopup("ALL SONGS UNLOCKED", "text-cyan-400 font-black");
   ui.content();
 };
 
 window.lockAllSongs = () => {
   state.songs.forEach((s, idx) => {
-    if (idx > 0) s.isLocked = true;
+    if (idx > 0) {
+      if (Array.isArray(s.isLocked)) {
+        s.isLocked = s.isLocked.map(() => true);
+      } else {
+        s.isLocked = true;
+      }
+    }
   });
   state.purchasedSongCount = 0;
   showPopup("SONGS LOCKED", "text-red-400 font-black");
@@ -193,6 +276,22 @@ window.updatePlayStat = (path, val, isArray = false, index = -1) => {
   ui.debug();
 };
 
+window.rewardAllFigures = () => {
+  FIGURES_DATA.forEach(f => state.unlockedFigures.add(f.id));
+  showPopup("ALL FIGURES UNLOCKED", "text-cyan-400 font-black");
+  ui.content();
+};
+
+window.resetAllFigures = () => {
+  state.unlockedFigures.clear();
+  state.unlockedFigures.add(1);
+  state.newlyUnlockedFigures.clear();
+  state.collectedSetRewards.clear();
+  state.decoCoins = 0;
+  showPopup("FIGURES RESET", "text-red-400 font-black");
+  ui.content();
+};
+
 // --- Game Actions ---
 
 window.toggleExpand = (id) => {
@@ -204,7 +303,10 @@ window.toggleExpand = (id) => {
 
 window.unlockWithCoins = (id) => {
   const song = state.songs.find(s => s.id === id);
-  if (!song || !song.isLocked) return;
+  if (!song) return;
+  
+  const isLocked = Array.isArray(song.isLocked) ? song.isLocked[0] : song.isLocked;
+  if (!isLocked) return;
 
   const cost = getSongCost(song);
   if (state.user.coins < cost) {
@@ -226,7 +328,12 @@ window.unlockWithCoins = (id) => {
   
   setTimeout(() => {
     state.visualUser.coins -= cost;
-    song.isLocked = false;
+    if (Array.isArray(song.isLocked)) {
+      song.isLocked[0] = false;
+    } else {
+      song.isLocked = false;
+    }
+    state.newlyUnlockedSongs.add(id);
     showPopup("SONG UNLOCKED!", "text-yellow-400 font-black text-2xl");
     ui.header();
     ui.content();
@@ -236,7 +343,10 @@ window.unlockWithCoins = (id) => {
 
 window.unlockWithAd = (id) => {
   const song = state.songs.find(s => s.id === id);
-  if (!song || !song.isLocked || state.unlockingTimers[id]) return;
+  if (!song || state.unlockingTimers[id]) return;
+  
+  const isLocked = Array.isArray(song.isLocked) ? song.isLocked[0] : song.isLocked;
+  if (!isLocked) return;
 
   const btn = document.getElementById(`free-btn-${id}`);
   if (!btn) return;
@@ -251,7 +361,12 @@ window.unlockWithAd = (id) => {
     if (timeLeft <= 0) {
       clearInterval(state.unlockingTimers[id]);
       delete state.unlockingTimers[id];
-      song.isLocked = false;
+      if (Array.isArray(song.isLocked)) {
+        song.isLocked[0] = false;
+      } else {
+        song.isLocked = false;
+      }
+      state.newlyUnlockedSongs.add(id);
       showPopup("FREE UNLOCK COMPLETE!", "text-cyan-400 font-black text-2xl");
       ui.content();
     } else {
@@ -260,61 +375,173 @@ window.unlockWithAd = (id) => {
   }, 1000);
 };
 
-window.playSong = (id) => {
+window.playSong = (id, difficultyIdx = 0) => {
   const song = state.songs.find(s => s.id === id);
-  if (!song || song.isLocked) return;
+  if (!song) return;
+  
+  const isLocked = Array.isArray(song.isLocked) ? song.isLocked[difficultyIdx] : song.isLocked;
+  if (isLocked) return;
 
-  const stats = simulatePlay(song);
+  showGameplayScene(song, difficultyIdx, (finalDiffIdx) => {
+    const stats = simulatePlay(song, finalDiffIdx);
 
-  showPlayStatsPopup(song, stats, () => {
-    const xpGained = stats.totalXp;
-    const coinsGained = stats.totalCoins;
+    showPlayStatsPopup(song, stats, () => {
+      // Apply rewards after popup is dismissed
+      const xpGained = stats.totalXp;
+      const coinsGained = stats.totalCoins;
 
-    const btn = document.getElementById(`play-btn-${id}`);
-    const targetXp = document.getElementById('xp-target');
-    const targetCoins = document.getElementById('coins-target');
-    
-    if (btn && targetXp && targetCoins) {
-      const startRect = btn.getBoundingClientRect();
+      const btn = document.getElementById(`play-btn-${id}`);
+      const targetXp = document.getElementById('xp-target');
+      const targetCoins = document.getElementById('coins-target');
+      
+      if (btn && targetXp && targetCoins) {
+        const startRect = btn.getBoundingClientRect();
 
-      VFXManager.spawnRewards('xp', xpGained, startRect, targetXp, (increment) => {
-        state.visualUser.xp += increment;
-        checkLevelUpVisual();
-        ui.header();
-      }, () => {
-        showPendingLevelUps();
-      });
+        VFXManager.spawnRewards('xp', xpGained, startRect, targetXp, (increment) => {
+          state.visualUser.xp += increment;
+          checkLevelUpVisual();
+          ui.header();
+        }, () => {
+          // All particles landed
+          showPendingLevelUps();
+        });
 
-      VFXManager.spawnRewards('coin', coinsGained, startRect, targetCoins, (increment) => {
-        state.visualUser.coins += increment;
-        ui.header();
-      });
-    }
+        VFXManager.spawnRewards('coin', coinsGained, startRect, targetCoins, (increment) => {
+          state.visualUser.coins += increment;
+          ui.header();
+        });
+      }
 
-    song.starLevel = Math.max(song.starLevel, stats.starLevel);
-    song.score += Math.floor(Math.random() * 500) + 500;
-    
-    state.user.xp += xpGained;
-    state.user.coins += coinsGained;
-    state.stats.totalPlayCount++;
-    state.stats.totalXpGained += xpGained;
-    state.stats.totalCoinGained += coinsGained;
-    
-    state.stats.totalTimeSpentPlaying += stats.effectiveSongDuration;
-    state.stats.totalTimeSpentWatchingAd += stats.adDuration;
-    if (stats.adDuration > 0) {
-      state.stats.totalAdCount += (stats.starLevel >= 4 ? 2 : 1);
-    }
+      // Update song state
+      if (Array.isArray(song.starLevel)) {
+        song.starLevel[finalDiffIdx] = Math.max(song.starLevel[finalDiffIdx], stats.starLevel);
+        song.score[finalDiffIdx] += Math.floor(Math.random() * 500) + 500;
+        
+        // Unlock next difficulty if available
+        if (finalDiffIdx + 1 < song.isLocked.length && song.isLocked[finalDiffIdx + 1]) {
+          song.isLocked[finalDiffIdx + 1] = false;
+          if (!state.newlyUnlockedDifficulties[id]) {
+            state.newlyUnlockedDifficulties[id] = new Set();
+          }
+          state.newlyUnlockedDifficulties[id].add(finalDiffIdx + 1);
+        }
+      } else {
+        song.starLevel = Math.max(song.starLevel, stats.starLevel);
+        song.score += Math.floor(Math.random() * 500) + 500;
+      }
+      
+      // Update user state
+      state.user.xp += xpGained;
+      state.user.coins += coinsGained;
+      state.stats.totalPlayCount++;
+      state.stats.totalXpGained += xpGained;
+      state.stats.totalCoinGained += coinsGained;
+      
+      // Update time stats
+      state.stats.totalTimeSpentPlaying += stats.effectiveSongDuration;
+      state.stats.totalTimeSpentWatchingAd += stats.adDuration;
+      if (stats.adDuration > 0) {
+        state.stats.totalAdCount += (stats.starLevel >= 4 ? 2 : 1);
+      }
 
-    while (state.user.xp >= getXpRequired(state.user.level)) {
-      state.user.xp -= getXpRequired(state.user.level);
-      state.user.level += 1;
-    }
-    
-    ui.content();
-    if (state.debugMode) ui.debug();
+      while (state.user.xp >= getXpRequired(state.user.level)) {
+        state.user.xp -= getXpRequired(state.user.level);
+        state.user.level += 1;
+      }
+      
+      ui.content();
+      if (state.debugMode) ui.debug();
+
+      // NEW: Show Gift Box Popup after song
+      setTimeout(() => {
+        showGiftBoxPopup();
+      }, 1000);
+    });
   });
 };
+
+function showGiftBoxPopup() {
+  const overlay = document.createElement('div');
+  overlay.id = 'gift-box-overlay';
+  overlay.className = "fixed inset-0 z-[400] bg-black/60 backdrop-blur-md flex items-center justify-center animate-in fade-in duration-300";
+  
+  overlay.innerHTML = `
+    <div class="relative flex flex-col items-center">
+      <div id="gift-box-container" class="w-48 h-48 bg-gradient-to-br from-pink-500 to-purple-600 rounded-3xl shadow-[0_0_50px_rgba(236,72,153,0.5)] flex items-center justify-center cursor-pointer hover:scale-110 transition-transform animate-bounce">
+        <svg class="w-24 h-24 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M20 6h-2.18c.11-.31.18-.65.18-1 0-1.66-1.34-3-3-3-1.05 0-1.96.54-2.5 1.35l-.5.65-.5-.65C10.96 2.54 10.05 2 9 2 7.34 2 6 3.34 6 5c0 .35.07.69.18 1H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-5-2c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zM9 4c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm11 15H4v-2h16v2zm0-5H4V8h5.08L7 10.83 8.41 12.25 12 8.66l3.59 3.59L17 10.83 14.92 8H20v6z"/></svg>
+      </div>
+      <p class="text-white font-black italic uppercase text-xl mt-8 animate-pulse">Tap to open gift!</p>
+    </div>
+  `;
+
+  document.body.appendChild(overlay);
+
+  const box = overlay.querySelector('#gift-box-container');
+  box.onclick = () => {
+    playGiftOpenVFX(box);
+    box.classList.remove('animate-bounce');
+    box.animate([
+      { transform: 'scale(1)', opacity: 1 },
+      { transform: 'scale(2)', opacity: 0 }
+    ], { duration: 500, fill: 'forwards' });
+
+    setTimeout(() => {
+      awardRandomFigure(overlay);
+    }, 500);
+  };
+}
+
+function awardRandomFigure(overlay) {
+  const randomFig = FIGURES_DATA[Math.floor(Math.random() * FIGURES_DATA.length)];
+  const isDuplicate = state.unlockedFigures.has(randomFig.id);
+  
+  if (isDuplicate) {
+    state.decoCoins += 10;
+  } else {
+    state.unlockedFigures.add(randomFig.id);
+    state.newlyUnlockedFigures.add(randomFig.id);
+  }
+
+  overlay.innerHTML = `
+    <div class="bg-gradient-to-br from-gray-900 to-black w-full max-w-sm rounded-[40px] border-2 border-white/20 p-8 flex flex-col items-center text-center shadow-[0_0_100px_rgba(0,0,0,0.8)] animate-in zoom-in duration-500">
+      <h2 class="text-white font-black text-3xl uppercase italic tracking-tighter mb-2">${isDuplicate ? 'DUPLICATE!' : 'NEW FIGURE!'}</h2>
+      <div id="awarded-figure-img" class="relative w-48 h-48 my-6 flex items-center justify-center">
+        <div class="absolute inset-0 bg-white/10 blur-3xl rounded-full"></div>
+        <img src="${randomFig.img}" class="w-40 h-40 object-contain relative z-10 drop-shadow-[0_0_20px_rgba(255,255,255,0.5)]" />
+      </div>
+      
+      <h3 class="text-white font-black text-xl mb-2">Figure #${randomFig.id}</h3>
+      
+      ${isDuplicate ? `
+        <div class="flex items-center gap-2 bg-pink-500/20 px-4 py-2 rounded-full border border-pink-500/30 mb-8">
+          <span class="text-pink-400 font-black italic">+10 DECO COINS</span>
+        </div>
+      ` : `
+        <p class="text-white/60 text-sm mb-8">Added to your collection!</p>
+      `}
+      
+      <button id="close-gift-btn" class="w-full bg-white text-black font-black italic py-4 rounded-2xl active:scale-95 transition-all uppercase tracking-widest">
+        Awesome
+      </button>
+    </div>
+  `;
+
+  overlay.querySelector('#close-gift-btn').onclick = () => {
+    const imgContainer = overlay.querySelector('#awarded-figure-img');
+    const navItems = document.querySelectorAll('#nav-root .cursor-pointer, #nav-root .mb-1');
+    const figureTab = navItems[1]; // Second icon
+
+    if (imgContainer && figureTab) {
+      const startRect = imgContainer.getBoundingClientRect();
+      VFXManager.spawnFigureFly(randomFig.img, startRect, figureTab, () => {
+        overlay.remove();
+        ui.nav(); // Refresh nav to show any indicators if needed
+      });
+    } else {
+      overlay.remove();
+    }
+  };
+}
 
 function checkLevelUpVisual() {
   while (state.visualUser.xp >= getXpRequired(state.visualUser.level)) {

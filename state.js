@@ -9,14 +9,12 @@ export const state = {
     name: 'Player One',
     level: 1,
     xp: 0,
-    coins: 2500,
-    stamina: 275,
-    maxStamina: 400,
+    coins: 0
   },
   visualUser: {
     level: 1,
     xp: 0,
-    coins: 100
+    coins: 0
   },
   stats: {
     totalPlayCount: 0,
@@ -32,6 +30,12 @@ export const state = {
   unlockingTimers: {},
   dynamicSongCostEnabled: false,
   purchasedSongCount: 0,
+  newlyUnlockedSongs: new Set(),
+  newlyUnlockedDifficulties: {}, // { songId: Set([idx, ...]) }
+  unlockedFigures: new Set([1]), // Start with one unlocked
+  newlyUnlockedFigures: new Set(),
+  collectedSetRewards: new Set(),
+  decoCoins: 0,
   pendingLevelUpRewards: [],
   isLevelUpPopupShowing: false,
   gameConfig: {

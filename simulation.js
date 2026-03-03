@@ -1,8 +1,13 @@
 
 import { PLAY_STAT } from './balance.js';
 
-export function simulatePlay(song) {
-  const currentStarLevel = song.starLevel || 0;
+export function simulatePlay(song, difficultyIdx = 0) {
+  const levels = Array.isArray(song.level) ? song.level : [song.level];
+  const starLevels = Array.isArray(song.starLevel) ? song.starLevel : [song.starLevel];
+  
+  const currentLevel = levels[difficultyIdx];
+  const currentStarLevel = starLevels[difficultyIdx] || 0;
+  
   const { starConfig, guaranteedCoins, songDuration, adDuration, idleDuration, noteConfig, guaranteedXpPerPlay, songDifficultyXpBonus, songDeluxeXpBonus, songOfTheDayXpBonus } = PLAY_STAT;
 
   // 1. Determine Star Level
@@ -46,7 +51,7 @@ export function simulatePlay(song) {
   let multiplier = 1.0;
   
   // Difficulty Bonus (level is 1-indexed, array is 0-indexed)
-  const diffIndex = Math.min(song.level - 1, songDifficultyXpBonus.length - 1);
+  const diffIndex = Math.min(currentLevel - 1, songDifficultyXpBonus.length - 1);
   multiplier += songDifficultyXpBonus[diffIndex];
 
   // Deluxe Bonus
