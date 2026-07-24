@@ -56,6 +56,47 @@ export function showLevelUpPopup(level, rewards, onConfirm) {
           </div>
         </div>
       `;
+    } else if (reward.type === 'item') {
+      return `
+        <div class="flex items-center gap-3 w-full bg-gradient-to-r from-yellow-500/20 to-amber-600/20 border border-yellow-500/40 rounded-2xl p-3 shadow-lg">
+          <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-yellow-500 to-amber-600 flex items-center justify-center text-3xl shadow-lg border-2 border-white/20 shrink-0 animate-bounce" style="animation-duration: 2.5s">
+             👜
+          </div>
+          <div class="text-left flex-1 min-w-0">
+            <p class="text-yellow-400 font-extrabold text-sm italic truncate leading-none mb-1">${reward.name}</p>
+            <p class="text-white/80 text-[10px] leading-tight font-bold font-sans">Allows carrying an additional companion pet in your team!</p>
+            <p class="text-[8px] text-cyan-400 font-bold uppercase tracking-wider mt-1 font-mono">Unlock Slot Permanently!</p>
+          </div>
+        </div>
+      `;
+    } else if (reward.type === 'pet') {
+      const PETS_MAP = {
+        1: { name: "Neon Meow", avatar: "🐱", ability: "10% of notes replaced with golden 200-pts notes" },
+        2: { name: "Beat Bunny", avatar: "🐰", ability: "adds 100 bonus pts every 5 combo streaks" },
+        3: { name: "Hyper Hamster", avatar: "🐹", ability: "first 10 notes worth x5 points" },
+        4: { name: "Rhythm Panda", avatar: "🐼", ability: "perfect hits give x2 pts after 50 perfects" },
+        5: { name: "Cyber Dragon", avatar: "🐉", ability: "+30 Boss dmg for each 1% accuracy" },
+        6: { name: "Mystic Fox", avatar: "🦊", ability: "Template ability. Be creative" },
+        7: { name: "Electro Pup", avatar: "🐶", ability: "Template ability. Be creative" },
+        8: { name: "Synth Sloth", avatar: "🦥", ability: "Template ability. Be creative" },
+        9: { name: "Cosmic Kitty", avatar: "🦉", ability: "Template ability. Be creative" },
+        10: { name: "Astro Axolotl", avatar: "🐠", ability: "Template ability. Be creative" },
+        11: { name: "Vocaloid Wolf", avatar: "🐺", ability: "Template ability. Be creative" },
+        12: { name: "Beat Hydra", avatar: "🦁", ability: "Template ability. Be creative" }
+      };
+      const pet = PETS_MAP[reward.petId] || { name: `Secret Companion #${reward.petId}`, avatar: "👾", ability: "Unknown power" };
+      return `
+        <div class="flex items-center gap-3 w-full bg-gradient-to-r from-fuchsia-500/20 to-purple-600/20 border border-fuchsia-500/40 rounded-2xl p-3 shadow-lg">
+          <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-fuchsia-500 to-purple-600 flex items-center justify-center text-3xl shadow-lg border-2 border-white/20 shrink-0 animate-bounce" style="animation-duration: 2.5s">
+             ${pet.avatar}
+          </div>
+          <div class="text-left flex-1 min-w-0">
+            <p class="text-fuchsia-400 font-extrabold text-sm italic truncate leading-none mb-1">${pet.name}</p>
+            <p class="text-white/80 text-[10px] leading-tight font-bold font-sans">${pet.ability}</p>
+            <p class="text-[8px] text-yellow-400 font-bold uppercase tracking-wider mt-1 font-mono">New Pet Unlocked & Equipped!</p>
+          </div>
+        </div>
+      `;
     }
     return '';
   };
@@ -69,6 +110,20 @@ export function showLevelUpPopup(level, rewards, onConfirm) {
       <h1 class="text-4xl font-black text-white italic uppercase tracking-tighter relative">Level Up!</h1>
       <p class="text-yellow-400 font-black text-xl uppercase tracking-widest mt-1">Reached LV.${level}</p>
     </div>
+
+    ${level === 4 ? `
+      <div class="w-full bg-gradient-to-r from-yellow-500/20 via-amber-500/25 to-yellow-500/20 border border-yellow-400/40 rounded-2xl p-3.5 mb-4 shadow-[0_0_15px_rgba(234,179,8,0.25)] select-none animate-in slide-in-from-bottom duration-300">
+        <p class="text-yellow-400 font-black text-xs tracking-wider uppercase leading-none">🚀 SPEED MODE UNLOCKED 🚀</p>
+        <p class="text-slate-200 text-[10px] leading-tight font-black font-sans mt-2">Beat the song in 2x-3x speed to get extra bonus!</p>
+      </div>
+    ` : ''}
+
+    ${level === 6 ? `
+      <div class="w-full bg-gradient-to-r from-pink-500/20 via-rose-500/25 to-pink-500/20 border border-pink-400/40 rounded-2xl p-3.5 mb-4 shadow-[0_0_15px_rgba(236,72,153,0.25)] select-none animate-in slide-in-from-bottom duration-300">
+        <p class="text-pink-400 font-black text-xs tracking-wider uppercase leading-none">📸 FIGURE COLLECTION UNLOCKED 📸</p>
+        <p class="text-slate-200 text-[10px] leading-tight font-black font-sans mt-2">Complete albums to unlock unique Pets!</p>
+      </div>
+    ` : ''}
 
     <div class="w-full h-px bg-gradient-to-r from-transparent via-white/20 to-transparent my-6"></div>
 
@@ -93,6 +148,13 @@ export function showLevelUpPopup(level, rewards, onConfirm) {
       popup.remove();
       layer.classList.add('pointer-events-none');
       layer.classList.remove('pointer-events-auto', 'bg-black/80', 'backdrop-blur-md');
+      
+      if (level === 6) {
+        if (window.switchTab) {
+          window.switchTab('FIGURES');
+        }
+      }
+      
       if (onConfirm) onConfirm();
     }, 200);
   };

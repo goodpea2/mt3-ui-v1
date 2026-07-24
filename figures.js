@@ -1,58 +1,49 @@
+import { MOCK_SONGS } from './songs.js';
 
-export const FIGURES_DATA = Array.from({ length: 40 }, (_, i) => ({
-  id: i + 1,
-  img: `https://picsum.photos/seed/fig${i+1}/200/200`,
-  description: `Figure #${i + 1}: A legendary mascot from the rhythm universe. Known for its incredible beat-matching skills.`,
-  decoCoinCost: 50
+export const FIGURES_DATA = MOCK_SONGS.map((song) => ({
+  id: song.id,
+  img: song.coverUrl,
+  title: song.title,
+  artist: song.artist,
+  description: `A legendary vinyl figure representing "${song.title}" by ${song.artist}. Displays an elegant rhythmic aura.`,
+  decoCoinCost: 0 // Free or deprecated, as figures are unlocked by star accumulation
 }));
 
 export const SET_FIGURES_DATA = [
   {
     id: 1,
     setName: 'Neon Nights',
-    figures: [1, 2, 3, 4, 5],
-    reward: { type: 'coin', amount: 500 }
+    figures: ['song-0', 'song-1', 'song-2', 'song-3', 'song-4'],
+    reward: { type: 'pet', petId: 13 }
   },
   {
     id: 2,
     setName: 'Retro Beats',
-    figures: [6, 7, 8, 9, 10],
-    reward: { type: 'coin', amount: 600 }
+    figures: ['song-5', 'song-6', 'song-7', 'song-8', 'song-9'],
+    reward: { type: 'pet', petId: 14 }
   },
   {
     id: 3,
     setName: 'Cyber Punk',
-    figures: [11, 12, 13, 14, 15],
-    reward: { type: 'coin', amount: 750 }
+    figures: ['song-10', 'song-11', 'song-12', 'song-13', 'song-14'],
+    reward: { type: 'pet', petId: 15 }
   },
   {
     id: 4,
     setName: 'Disco Fever',
-    figures: [16, 17, 18, 19, 20],
-    reward: { type: 'coin', amount: 800 }
+    figures: ['song-15', 'song-16', 'song-17', 'song-18', 'song-19'],
+    reward: { type: 'pet', petId: 16 }
   },
   {
     id: 5,
     setName: 'Synth Wave',
-    figures: [21, 22, 23, 24, 25],
-    reward: { type: 'coin', amount: 1000 }
+    figures: ['song-20', 'song-21', 'song-22', 'song-23', 'song-24'],
+    reward: { type: 'pet', petId: 17 }
   },
   {
     id: 6,
     setName: 'Lo-Fi Chill',
-    figures: [26, 27, 28, 29, 30],
-    reward: { type: 'coin', amount: 500 }
-  },
-  {
-    id: 7,
-    setName: 'Heavy Metal',
-    figures: [31, 32, 33, 34, 35],
-    reward: { type: 'coin', amount: 1200 }
-  },
-  {
-    id: 8,
-    setName: 'Pop Stars',
-    figures: [36, 37, 38, 39, 40],
-    reward: { type: 'coin', amount: 1500 }
+    figures: ['song-25', 'song-26', 'song-27', 'song-28', 'song-29'],
+    reward: { type: 'pet', petId: 18 }
   }
 ];

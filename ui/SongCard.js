@@ -1,3 +1,5 @@
+import { state } from '../state.js';
+import { getStarJourneyLevelAndProgress } from '../balance.js';
 
 const DIFFICULTY_MAP = {
   1: "Easy",
@@ -6,26 +8,6 @@ const DIFFICULTY_MAP = {
   4: "Expert",
   5: "Extreme",
   6: "Hell"
-};
-
-const getStarConfig = (level) => {
-  const configs = [
-    ['empty', 'empty', 'empty'],
-    ['empty', 'empty', 'star'],
-    ['empty', 'star', 'star'],
-    ['star', 'star', 'star'],
-    ['star', 'star', 'crown'],
-    ['star', 'crown', 'crown'],
-    ['crown', 'crown', 'crown'],
-  ];
-  return configs[level] || configs[0];
-};
-
-const ICONS = {
-  star: `<svg class="w-full h-full" viewBox="0 0 24 24" fill="currentColor"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" /></svg>`,
-  crown: `<svg class="w-full h-full" viewBox="0 0 24 24" fill="currentColor"><path d="M5 16L3 5L8.5 10L12 4L15.5 10L21 5L19 16H5M19 19C19 19.6 18.6 20 18 20H6C5.4 20 5 19.6 5 19V18H19V19Z" /></svg>`,
-  empty: `<svg class="w-full h-full opacity-20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" /></svg>`,
-  coin: `<div class="w-3.5 h-3.5 rounded-full bg-gradient-to-br from-yellow-400 to-orange-600 flex items-center justify-center shadow-lg shrink-0 border border-white/20"><span class="text-white font-black text-[8px] leading-none">$</span></div>`
 };
 
 export function getSongCardHtml(song, isExpanded) {
@@ -41,44 +23,25 @@ export function getSongCardHtml(song, isExpanded) {
   const starLevels = Array.isArray(starLevel) ? starLevel : [starLevel];
   const isLockedArray = Array.isArray(isLocked) ? isLocked : [isLocked];
 
-  // Find the highest unlocked difficulty index
-  let activeDiffIdx = 0;
-  for (let i = isLockedArray.length - 1; i >= 0; i--) {
-    if (!isLockedArray[i]) {
-      activeDiffIdx = i;
-      break;
-    }
-  }
+  // Always display the first available difficulty
+  const activeDiffIdx = 0;
+  const currentLevel = levels[0];
 
-  const currentLevel = levels[activeDiffIdx];
-  const currentScore = scores[activeDiffIdx];
-  const currentStarLevel = starLevels[activeDiffIdx];
-  const currentIsLocked = isLockedArray[activeDiffIdx];
-  const difficulty = DIFFICULTY_MAP[currentLevel];
-  
-  let levelColor = "bg-blue-500";
-  let levelHex = "#3b82f6";
-  if (currentLevel >= 3 && currentLevel <= 4) {
-    levelColor = "bg-yellow-500";
-    levelHex = "#eab308";
-  } else if (currentLevel >= 5) {
-    levelColor = "bg-red-600";
-    levelHex = "#dc2626";
-  }
-
-  const starConfig = getStarConfig(currentStarLevel);
-  const starSizeClass = "w-6 h-6";
-
-  const showStars = !currentIsLocked && (isExpanded || (currentStarLevel > 0));
-  const starsHtml = showStars ? `
-    <div class="flex gap-0.5 transition-all duration-300 ${isExpanded ? 'star-vfx' : ''}" style="color: ${levelHex}">
-      ${starConfig.map(type => `
-        <div class="${starSizeClass} transition-all duration-300">
-          ${ICONS[type]}
-        </div>
-      `).join('')}
-    </div>
-  ` : '';
+  const difficultyBadges = levels.map((l, idx) => {
+    let color = "bg-blue-500";
+    if (l >= 3 && l <= 4) color = "bg-yellow-500";
+    else if (l >= 5) color = "bg-red-600";
+    
+    // First difficulty icon is always unlocked!
+    const isLocked = idx === 0 ? false : isLockedArray[idx];
+    const isActive = idx === activeDiffIdx; // always active for first
+    
+    return `
+      <div class="${color} ${isLocked ? 'opacity-30 grayscale' : 'opacity-100'} ${isActive ? 'scale-110 font-bold' : 'scale-90'} w-4 h-4 flex items-center justify-center text-white text-[8px] font-black rounded-full shadow-sm shrink-0 transition-all">
+        ${isLocked ? '<svg class="w-2 h-2" fill="currentColor" viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>' : l}
+      </div>
+    `;
+  }).join('');
 
   const sotdRibbon = isSotd ? `
     <div class="flex justify-end pr-2 -mb-2 relative z-20">
@@ -88,110 +51,90 @@ export function getSongCardHtml(song, isExpanded) {
     </div>
   ` : '';
 
-  const cardHeightClass = isExpanded ? 'h-[85px]' : 'h-[65px]';
-  const containerClass = `song-card relative w-full rounded-xl overflow-hidden cursor-pointer ${cardHeightClass} ${isExpanded ? 'fancy-outline-container' : 'shadow-md'}`;
-  
-  let contentBg = isExpanded 
-    ? (isDeluxe ? "bg-gradient-to-br from-yellow-50 via-white to-orange-100" : "bg-gradient-to-br from-white via-blue-50 to-blue-100")
-    : (isDeluxe ? "bg-gradient-to-r from-[#5a1a1a] via-[#2d1b5e] to-[#1a0b3d]" : "bg-gradient-to-r from-[#2d1b5e] to-[#1a0b3d]");
-
-  const isButtonVisible = !isLockedArray[0] && (isExpanded || currentStarLevel === 0);
-
-  // Locked specific buttons: Purchase is smaller and tinted purple
-  const lockedButtons = isLockedArray[0] ? `
-    <div class="flex items-center gap-2">
-      <button 
-        id="purchase-btn-${id}"
-        onclick="event.stopPropagation(); window.unlockWithCoins('${id}')"
-        class="flex items-center gap-1.5 bg-gradient-to-b from-indigo-400 to-blue-600 text-white font-black italic text-[8px] px-2 py-1 rounded-xl border-b-2 border-indigo-900 active:border-b-0 active:translate-y-[1px] transition-all shadow-md group"
-      >
-        ${ICONS.coin}
-        <span class="text-yellow-300 drop-shadow-sm">${coinCost.toLocaleString()}</span>
-      </button>
-      <button 
-        id="free-btn-${id}"
-        onclick="event.stopPropagation(); window.unlockWithAd('${id}')"
-        class="flex items-center gap-1.5 bg-gradient-to-b from-cyan-400 to-blue-500 text-white font-black italic text-[9px] px-4 py-1.5 rounded-xl border-b-2 border-blue-900 active:border-b-0 active:translate-y-[1px] transition-all shadow-md"
-      >
-        <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
-        FREE
-      </button>
+  const boostRibbon = song.deluxeSongBoost ? `
+    <div class="flex justify-end pr-2 -mb-2 relative z-20">
+      <div class="bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-500 text-slate-950 text-[9px] font-extrabold px-3.5 py-1 rounded-tl-xl rounded-tr-md flex items-center gap-1.5 shadow-lg animate-pulse uppercase tracking-wider">
+        🔥 DELUXE: ${song.deluxeSongBoost.buffType} 🔥
+      </div>
     </div>
   ` : '';
 
-  const difficultyBadges = levels.map((l, idx) => {
-    let color = "bg-blue-500";
-    if (l >= 3 && l <= 4) color = "bg-yellow-500";
-    else if (l >= 5) color = "bg-red-600";
-    
-    const isLocked = isLockedArray[idx];
-    const isActive = idx === activeDiffIdx;
-    
-    return `
-      <div class="${color} ${isLocked ? 'opacity-30 grayscale' : 'opacity-100'} ${isActive ? 'ring-2 ring-white scale-110' : 'scale-90'} w-4 h-4 flex items-center justify-center text-white text-[8px] font-black rounded-full shadow-sm shrink-0 transition-all">
-        ${isLocked ? '<svg class="w-2 h-2" fill="currentColor" viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>' : l}
+  const containerClass = `song-card relative w-full rounded-xl overflow-hidden cursor-pointer h-[72px] border border-white/5 hover:border-[#a855f7]/30 transition-all duration-300 hover:scale-[1.015] shadow-lg`;
+  
+  const contentBg = isLockedArray[0]
+    ? "bg-gradient-to-r from-zinc-700 to-zinc-800"
+    : (isDeluxe 
+        ? "bg-gradient-to-r from-[#5a1a1a] via-[#2d1b5e] to-[#1a0b3d]" 
+        : "bg-gradient-to-r from-[#2d1b5e] to-[#1a0b3d]");
+
+  // Right section logic based on user's requirements:
+  // - the numbers of stars remaining available to collect (num⭐)
+  // - show a check if all stars is collected
+  // - show the coin item if the song is locked
+  const totalStars = state.visualUser?.totalStars || state.user?.totalStars || 0;
+  const journey = getStarJourneyLevelAndProgress(totalStars);
+  const maxStarsPerDiff = journey.level < 4 ? 3 : 6;
+  const maxStarsPoss = levels.length * maxStarsPerDiff;
+  const totalCollected = starLevels.reduce((sum, current) => {
+    return sum + Math.min(maxStarsPerDiff, current || 0);
+  }, 0);
+  const remainingStars = Math.max(0, maxStarsPoss - totalCollected);
+
+  let rightSectionHtml = '';
+  if (isLockedArray[0]) {
+    rightSectionHtml = `
+      <div class="flex items-center gap-1 bg-[#1a0b3d]/90 border border-cyan-500/30 rounded-xl px-2 py-1 shadow-md">
+        <span class="text-[10.5px] leading-none mb-0.5">🔑</span>
+        <span class="text-cyan-400 font-extrabold text-[10px] italic font-mono leading-none">${coinCost.toLocaleString()}</span>
       </div>
     `;
-  }).join('');
+  } else if (remainingStars === 0) {
+    rightSectionHtml = `
+      <div class="w-7 h-7 bg-emerald-500/20 border border-emerald-400/50 rounded-full flex items-center justify-center text-emerald-400 font-black text-xs shadow-inner" title="All stars collected!">
+        ✓
+      </div>
+    `;
+  } else {
+    rightSectionHtml = `
+      <div class="flex items-center gap-1 border border-white/5 bg-[#12082b]/85 rounded-full px-2.5 py-1.5 shadow-md">
+        <span class="text-indigo-200 font-black text-[11px] font-mono leading-none">${remainingStars}</span>
+        <span class="text-yellow-400 text-[10px] leading-none">⭐</span>
+      </div>
+    `;
+  }
 
   return `
-    <div class="w-full card-wrapper ${isExpanded ? 'expanded' : 'collapsed'}" data-id="${id}">
-      ${sotdRibbon}
-      <div onclick="window.toggleExpand('${id}')" class="${containerClass}">
-        ${isExpanded && isDeluxe ? '<div class="deluxe-sparkle"></div>' : ''}
+    <div class="w-full card-wrapper" data-id="${id}">
+      ${sotdRibbon || boostRibbon}
+      <div onclick="window.openSongInfo('${id}', 0)" class="${containerClass}">
+        ${isDeluxe ? '<div class="deluxe-sparkle"></div>' : ''}
         <div class="absolute inset-0 halftone-bg opacity-10 pointer-events-none"></div>
         
-        <div class="relative h-full w-full ${contentBg} flex items-center p-2 gap-2 transition-colors duration-300">
+        <div class="relative h-full w-full ${contentBg} flex items-center py-1 px-2 gap-2.5 transition-colors duration-300">
           
-          <div class="relative shrink-0 transition-all duration-300 ${isExpanded ? 'w-16 h-16' : 'w-12 h-12'}">
-            <img src="${coverUrl}" class="w-full h-full object-cover rounded-lg border border-white/40 shadow-md transition-all duration-300" />
-            <div class="absolute inset-0 rounded-lg blur-md opacity-10 transition-opacity duration-300 ${isExpanded ? 'opacity-30' : 'opacity-0'}" style="background: ${levelHex}"></div>
+          <div class="relative shrink-0 w-16 h-16">
+            <img src="${coverUrl}" class="w-full h-full object-cover rounded-lg border border-white/20 shadow-md" />
           </div>
 
           <div class="flex-1 flex flex-col justify-center overflow-hidden h-full">
             <div class="flex items-center gap-1.5">
               ${isDeluxe ? `<span class="bg-red-600 text-white text-[6px] font-black px-1 py-0.5 rounded italic shrink-0">DELUXE</span>` : ''}
-              <h4 class="${isExpanded ? 'text-blue-900' : 'text-white'} font-black text-xs truncate uppercase tracking-tight transition-all duration-300">${title}</h4>
+              <h4 class="text-white font-black text-xs truncate uppercase tracking-tight">${title}</h4>
             </div>
-            <p class="${isExpanded ? 'text-blue-400' : 'text-purple-300/60'} text-[9px] font-bold truncate transition-colors duration-300">${artist}</p>
             
-            <div class="flex flex-col mt-0.5">
-              <div class="flex items-center gap-2">
-                <div class="inline-flex items-center rounded-full bg-black/5 overflow-hidden h-4 transition-all duration-300 ${isExpanded ? 'pr-2 border border-black/5' : 'w-auto px-0.5'}">
-                   <div class="flex gap-0.5">
-                     ${difficultyBadges}
-                   </div>
-                   <div class="text-blue-900/80 px-1.5 py-0.5 text-[7px] font-black italic uppercase transition-all duration-300 overflow-hidden ${isExpanded ? 'w-auto opacity-100' : 'w-0 opacity-0'}">
-                     ${difficulty}
-                   </div>
-                </div>
-
-                <div class="flex items-center gap-1 text-[#4ade80] text-[8px] font-bold transition-all duration-300 ${isExpanded ? 'opacity-0 w-0 overflow-hidden' : 'opacity-100'}">
-                  <svg class="w-2 h-2" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
-                  ${playCount}
-                </div>
-              </div>
-              
-              <div class="transition-all duration-300 ${isExpanded ? 'h-4 opacity-100 mt-0.5' : 'h-0 opacity-0 overflow-hidden'}">
-                <div class="font-black text-base italic tracking-tighter leading-none ${isLockedArray[0] ? 'text-purple-400/50' : 'text-blue-500'}">
-                  ${isLockedArray[0] ? 'LOCKED' : currentScore.toLocaleString()}
-                </div>
+            <p class="text-purple-300/60 text-[9.5px] font-bold truncate mt-0.5">${artist}</p>
+            
+            <div class="flex items-center gap-2 mt-1">
+              <div class="inline-flex items-center rounded-full bg-black/20 px-1.5 py-0.5 border border-white/5 h-4 gap-1">
+                 <div class="flex gap-0.5 shrink-0">
+                   ${difficultyBadges}
+                 </div>
               </div>
             </div>
           </div>
 
-          <div class="flex flex-col items-end justify-center gap-1 h-full py-0.5 pr-1">
-            ${isLockedArray[0] ? lockedButtons : starsHtml}
-            
-            <div class="transition-all duration-300 ${isButtonVisible ? 'opacity-100 h-8 translate-y-0' : 'opacity-0 h-0 translate-y-2 overflow-hidden'}">
-              <button 
-                id="play-btn-${id}"
-                onclick="event.stopPropagation(); window.playSong('${id}', ${activeDiffIdx})" 
-                class="play-btn-vfx bg-gradient-to-b from-[#ff00ff] to-[#d400d4] text-white font-black italic text-xs px-6 py-1.5 rounded-xl border-b-4 border-[#960096] active:border-b-0 active:translate-y-[2px] transition-all shadow-[0_10px_20px_-5px_rgba(255,0,255,0.4)]"
-              >
-                PLAY
-              </button>
-            </div>
+          <div class="relative shrink-0 flex items-center justify-end pr-1">
+            ${rightSectionHtml}
           </div>
         </div>
       </div>

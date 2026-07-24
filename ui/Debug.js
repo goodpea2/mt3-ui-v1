@@ -26,30 +26,35 @@ export function renderDebug(state, getCurrentDynamicCost) {
       <!-- Stats Panel -->
       <div class="bg-white/5 rounded-lg border border-white/10 p-3 flex flex-col gap-1 text-[10px] font-black italic text-cyan-400">
          <p>Total play count: ${state.stats.totalPlayCount}</p>
-         <p>Total XP gained: ${state.stats.totalXpGained.toLocaleString()}</p>
+         <p>Total Stars Gained: ${(state.user.totalStars || 0).toLocaleString()} / 431 ⭐</p>
          <p>Total Coin gained: ${state.stats.totalCoinGained.toLocaleString()}</p>
          <p>Total Coin spent: ${state.stats.totalCoinSpent.toLocaleString()}</p>
-         <p class="text-purple-400 mt-1">Total Time Playing: ${Math.floor(state.stats.totalTimeSpentPlaying / 60)}m ${state.stats.totalTimeSpentPlaying % 60}s</p>
-         <p class="text-purple-400">Total Time Ads: ${Math.floor(state.stats.totalTimeSpentWatchingAd / 60)}m ${state.stats.totalTimeSpentWatchingAd % 60}s</p>
-         <p class="text-purple-400">Total Ads Watched: ${state.stats.totalAdCount}</p>
+         <p class="text-purple-400 mt-1">Total Ads Watched: ${state.stats.totalAdCount}</p>
       </div>
 
       <!-- Cheat Buttons -->
       <div class="grid grid-cols-2 gap-2 shrink-0">
-        <button onclick="window.add1000Xp()" class="${cheatBtnClass}">Add 1000 XP</button>
+        <button onclick="window.add5Stars()" class="${cheatBtnClass}">Add 5 Pass Stars ⭐</button>
         <button onclick="window.add1000Coins()" class="${cheatBtnClass}">Add 1000 Coins</button>
+        <button onclick="window.add10Pellets()" class="${cheatBtnClass}">Add 10 Food 🍪</button>
+        <button onclick="window.add10Keys()" class="${cheatBtnClass}">Add 10 Keys 🔑</button>
+        <button onclick="window.add10DecoTickets()" class="${cheatBtnClass}">Add 10 Deco Tickets 🎫</button>
+        <button onclick="window.add100DecoCoins()" class="${cheatBtnClass}">Add 100 DecoCoin 🪙</button>
         <button onclick="window.unlockAllSongs()" class="${cheatBtnClass}">Unlock All Songs</button>
         <button onclick="window.lockAllSongs()" class="${cheatBtnClass}">Lock All Songs</button>
-        <button onclick="window.resetToLevel1()" class="${cheatBtnClass}">Reset XP Level</button>
+        <button onclick="window.resetToLevel1()" class="${cheatBtnClass}">Reset Journey</button>
         <button onclick="window.resetAllCounters()" class="${cheatBtnClass}">Reset Counters</button>
         <button onclick="window.rewardAllFigures()" class="${cheatBtnClass}">Reward All Figures</button>
         <button onclick="window.resetAllFigures()" class="${cheatBtnClass}">Reset All Figures</button>
+        <button onclick="window.unlockAllStageElements()" class="${cheatBtnClass}">🔓 Unlock All Stage Styles</button>
+        <button onclick="window.resetAllStageElements()" class="${cheatBtnClass}">♻️ Reset Stage Styles</button>
+        <button onclick="window.killCurrentBoss()" class="${cheatBtnClass}">💥 Kill Current Boss</button>
       </div>
 
       <!-- Dynamic Pricing Config -->
       <div class="space-y-2 p-3 bg-white/5 rounded-lg border border-white/10">
-        <div class="flex justify-between items-center mb-1">
-          <h3 class="text-white text-[10px] font-black uppercase tracking-tighter">Dynamic Pricing</h3>
+         <div class="flex justify-between items-center mb-1">
+           <h3 class="text-white text-[10px] font-black uppercase tracking-tighter">Dynamic Pricing - Depreciated</h3>
           <button onclick="window.toggleDynamicCost()" class="px-3 py-1 rounded text-[8px] font-black ${state.dynamicSongCostEnabled ? 'bg-green-500 text-black' : 'bg-gray-700 text-white'}">
             ${state.dynamicSongCostEnabled ? 'ENABLED' : 'DISABLED'}
           </button>
@@ -80,7 +85,7 @@ export function renderDebug(state, getCurrentDynamicCost) {
       <!-- Play Config -->
       <div class="p-3 bg-white/5 rounded-lg border border-white/10 flex flex-col">
         <div class="flex justify-between items-center mb-1 shrink-0">
-          <h3 class="text-white text-[10px] font-black uppercase tracking-tighter">Play Config (Simulation)</h3>
+          <h3 class="text-white text-[10px] font-black uppercase tracking-tighter">Play Config (Simulation) - Depreciated</h3>
           <button onclick="window.toggleDebugSection('play')" class="text-[8px] font-black bg-cyan-500/20 text-cyan-400 px-2 py-1 rounded border border-cyan-500/30">CONFIG</button>
         </div>
         ${state.debugSections.play ? `
@@ -116,38 +121,6 @@ export function renderDebug(state, getCurrentDynamicCost) {
                   <p class="debug-label">Note Count Max (0-6 stars)</p>
                   <input type="text" value="${PLAY_STAT.noteConfig.noteCountMax.join(', ')}" onchange="window.updatePlayStat('noteConfig.noteCountMax', this.value, true)" class="debug-input" />
                 </div>
-                <div class="grid grid-cols-2 gap-2">
-                  <div>
-                    <p class="debug-label">XP Per Hit Accuracy (Pf,Gr,Go)</p>
-                    <input type="text" value="${PLAY_STAT.noteConfig.xpPerAccuracy.join(', ')}" onchange="window.updatePlayStat('noteConfig.xpPerAccuracy', this.value, true)" class="debug-input" />
-                  </div>
-                  <div>
-                    <p class="debug-label">Guaranteed XP Per Play (Min,Max)</p>
-                    <input type="text" value="${PLAY_STAT.guaranteedXpPerPlay.join(', ')}" onchange="window.updatePlayStat('guaranteedXpPerPlay', this.value, true)" class="debug-input" />
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- XP Multipliers -->
-            <div class="space-y-2">
-              <p class="text-white/40 text-[8px] font-bold uppercase border-b border-white/5 pb-1">XP Multipliers</p>
-              <div class="grid grid-cols-1 gap-2">
-                <div>
-                  <p class="debug-label">Difficulty XP Bonus (diff 1-6)</p>
-                  <input type="text" value="${PLAY_STAT.songDifficultyXpBonus.join(', ')}" onchange="window.updatePlayStat('songDifficultyXpBonus', this.value, true)" class="debug-input" />
-                </div>
-                <div class="grid grid-cols-2 gap-2">
-                  <div>
-                    <p class="debug-label">Deluxe XP Bonus</p>
-                    <input type="number" step="0.1" value="${PLAY_STAT.songDeluxeXpBonus}" oninput="window.updatePlayStat('songDeluxeXpBonus', this.value)" class="debug-input" />
-                  </div>
-                  <div>
-                    <p class="debug-label">SotD XP Bonus</p>
-                    <input type="number" step="0.1" value="${PLAY_STAT.songOfTheDayXpBonus}" oninput="window.updatePlayStat('songOfTheDayXpBonus', this.value)" class="debug-input" />
-                  </div>
-                </div>
-              </div>
             </div>
 
             <!-- Global Durations -->
@@ -176,10 +149,30 @@ export function renderDebug(state, getCurrentDynamicCost) {
         ` : ''}
       </div>
 
-      <!-- XP Level Config -->
+      <!-- Gameplay Config -->
       <div class="p-3 bg-white/5 rounded-lg border border-white/10 flex flex-col shrink-0">
         <div class="flex justify-between items-center mb-1 shrink-0">
-          <h3 class="text-white text-[10px] font-black uppercase tracking-tighter">XP Level Config</h3>
+          <h3 class="text-white text-[10px] font-black uppercase tracking-tighter">Gameplay Config - Depreciated</h3>
+          <button onclick="window.toggleDebugSection('gameplay')" class="text-[8px] font-black bg-cyan-500/20 text-cyan-400 px-2 py-1 rounded border border-cyan-500/30">CONFIG</button>
+        </div>
+        ${state.debugSections.gameplay ? `
+          <div class="space-y-3 mt-2 pr-1">
+            <div>
+              <p class="debug-label">Min Notes by Difficulty (index 0-5)</p>
+              <input type="text" value="${state.gameplayConfig.minNotesByDifficulty.join(', ')}" onchange="window.updateGameplayConfig('minNotesByDifficulty', this.value)" class="debug-input" />
+            </div>
+            <div>
+              <p class="debug-label">Max Notes by Difficulty (index 0-5)</p>
+              <input type="text" value="${state.gameplayConfig.maxNotesByDifficulty.join(', ')}" onchange="window.updateGameplayConfig('maxNotesByDifficulty', this.value)" class="debug-input" />
+            </div>
+          </div>
+        ` : ''}
+      </div>
+
+      <!-- StarJourney Rewards Config -->
+      <div class="p-3 bg-white/5 rounded-lg border border-white/10 flex flex-col shrink-0">
+        <div class="flex justify-between items-center mb-1 shrink-0">
+          <h3 class="text-white text-[10px] font-black uppercase tracking-tighter">StarJourney Rewards Config - Depreciated</h3>
           <button onclick="window.toggleDebugSection('xp')" class="text-[8px] font-black bg-cyan-500/20 text-cyan-400 px-2 py-1 rounded border border-cyan-500/30">CONFIG</button>
         </div>
         ${state.debugSections.xp ? `
@@ -188,7 +181,7 @@ export function renderDebug(state, getCurrentDynamicCost) {
               class="debug-input h-48 font-mono text-[8px] leading-tight whitespace-pre overflow-x-auto" 
               onchange="window.updateAllLevelBalancing(this.value)"
             >${LEVEL_BALANCING.map(item => JSON.stringify(item)).join(',\n')}</textarea>
-            <p class="text-[8px] text-white/20 italic">Format: {xpRequired: 200, reward: {type: 'coin', amount: 100}}, ...</p>
+            <p class="text-[8px] text-white/20 italic">Format: {level: 2, reward: {type: 'coin', amount: 500}}, ...</p>
           </div>
         ` : ''}
       </div>

@@ -77,6 +77,7 @@ export class VFXManager {
 
   static createParticle(type, start, target, config, value, onHit, isReverse = false) {
     const p = document.createElement('div');
+    p.className = 'vfx-particle';
     const size = 10;
     
     p.style.position = 'fixed';

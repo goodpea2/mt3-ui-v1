@@ -5,10 +5,10 @@ export function renderNav(state, onTabSwitch) {
   
   const tabs = [
     { id: 'HOME', label: 'Home', icon: 'H' },
+    { id: 'STAGE', label: 'Stage', icon: 'ST' },
     { id: 'FIGURES', label: 'Figures', icon: 'F' },
-    { id: 'PLAYLIST', label: 'Playlist', icon: 'P' },
-    { id: 'RANK', label: 'Rank', icon: 'R' },
-    { id: 'SHOP', label: 'Shop', icon: 'S' }
+    { id: 'PLAYLIST', label: 'Unused', icon: 'X' },
+    { id: 'SHOP', label: 'Unused', icon: 'X' }
   ];
 
   container.innerHTML = `
@@ -32,13 +32,19 @@ export function renderNav(state, onTabSwitch) {
             `;
           } else {
             return `
-              <div onclick="window.switchTab('${tab.id}')" class="mb-1 opacity-60 hover:opacity-100 transition-all cursor-pointer flex flex-col items-center transform hover:scale-110">
+              <div onclick="window.switchTab('${tab.id}')" class="relative mb-1 opacity-60 hover:opacity-100 transition-all cursor-pointer flex flex-col items-center transform hover:scale-110">
                  <div class="w-10 h-10 bg-[#2d1b5e]/80 rounded-xl flex items-center justify-center border border-white/10 shadow-2xl backdrop-blur-md">
                     <div class="w-6 h-6 rounded-lg bg-[#4a2d8a]/50 flex items-center justify-center text-purple-200 text-[10px] font-black uppercase">
                        ${tab.icon}
                     </div>
                  </div>
                  <span class="text-[7px] font-black text-purple-300 mt-0.5 uppercase">${tab.label}</span>
+                  ${tab.id === 'FIGURES' && state.user && state.user.level >= 6 && state.figuresBadgeCount > 0 ? `
+                    <div class="absolute -top-1 -right-1 bg-gradient-to-r from-rose-500 to-pink-500 text-white font-extrabold text-[7px] px-1 py-0.5 rounded-full uppercase leading-none border border-white/30 shadow-[0_0_8px_rgba(244,63,94,0.8)] z-[60] animate-bounce">${state.figuresBadgeCount}</div>
+                  ` : ''}
+                 ${tab.id === 'STAGE' && state.stageButtonNewTag ? `
+                   <div class="absolute -top-1 -right-1 bg-gradient-to-r from-rose-500 to-pink-500 text-white font-extrabold text-[5.5px] px-1 py-0.5 rounded-full uppercase leading-none border border-white/30 shadow-[0_0_8px_rgba(244,63,94,0.8)] z-[60] animate-bounce">NEW</div>
+                 ` : ''}
               </div>
             `;
           }

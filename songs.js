@@ -1,18 +1,18 @@
-
 export const MOCK_SONGS = [
   {
     id: "song-0",
     title: "Blinding Lights",
     artist: "The Weeknd",
-    level: [1, 3, 5],
-    score: [18450, 0, 0],
+    level: [1],
+    score: [18450],
     playCount: "42K",
     coverUrl: "https://picsum.photos/seed/song0/400/400",
-    starLevel: [0, 0, 0],
+    starLevel: [0],
     isSotd: true,
     isDeluxe: false,
-    isLocked: [false, true, true],
-    coinCost: 250
+    isLocked: [false],
+    coinCost: 250,
+    noteCount: [48]
   },
   {
     id: "song-1",
@@ -26,7 +26,8 @@ export const MOCK_SONGS = [
     isSotd: false,
     isDeluxe: false,
     isLocked: [false, true],
-    coinCost: 350
+    coinCost: 350,
+    noteCount: [68, 114]
   },
   {
     id: "song-2",
@@ -39,8 +40,9 @@ export const MOCK_SONGS = [
     starLevel: [0, 0, 0],
     isSotd: false,
     isDeluxe: false,
-    isLocked: [false, true, true],
-    coinCost: 500
+    isLocked: [true, true, true],
+    coinCost: 500,
+    noteCount: [85, 145, 192]
   },
   {
     id: "song-3",
@@ -54,7 +56,8 @@ export const MOCK_SONGS = [
     isSotd: false,
     isDeluxe: false,
     isLocked: [true, true],
-    coinCost: 250
+    coinCost: 250,
+    noteCount: [42, 75]
   },
   {
     id: "song-4",
@@ -68,7 +71,8 @@ export const MOCK_SONGS = [
     isSotd: false,
     isDeluxe: true,
     isLocked: [true, true],
-    coinCost: 1500
+    coinCost: 1500,
+    noteCount: [120, 210]
   },
   {
     id: "song-5",
@@ -82,7 +86,8 @@ export const MOCK_SONGS = [
     isSotd: false,
     isDeluxe: false,
     isLocked: [true, true],
-    coinCost: 350
+    coinCost: 350,
+    noteCount: [72, 125]
   },
   {
     id: "song-6",
@@ -96,7 +101,8 @@ export const MOCK_SONGS = [
     isSotd: false,
     isDeluxe: false,
     isLocked: [true],
-    coinCost: 500
+    coinCost: 500,
+    noteCount: [95]
   },
   {
     id: "song-7",
@@ -110,7 +116,8 @@ export const MOCK_SONGS = [
     isSotd: false,
     isDeluxe: false,
     isLocked: [true, true],
-    coinCost: 1000
+    coinCost: 1000,
+    noteCount: [155, 215]
   },
   {
     id: "song-8",
@@ -124,7 +131,8 @@ export const MOCK_SONGS = [
     isSotd: false,
     isDeluxe: true,
     isLocked: [true, true, true],
-    coinCost: 700
+    coinCost: 700,
+    noteCount: [80, 110, 140]
   },
   {
     id: "song-9",
@@ -138,7 +146,8 @@ export const MOCK_SONGS = [
     isSotd: false,
     isDeluxe: false,
     isLocked: [true],
-    coinCost: 750
+    coinCost: 750,
+    noteCount: [118]
   },
   {
     id: "song-10",
@@ -152,35 +161,38 @@ export const MOCK_SONGS = [
     isSotd: false,
     isDeluxe: false,
     isLocked: [true, true],
-    coinCost: 500
+    coinCost: 500,
+    noteCount: [88, 162]
   },
   {
     id: "song-11",
     title: "As It Was",
     artist: "Harry Styles",
-    level: [1],
-    score: [0],
+    level: [1, 5],
+    score: [0, 0],
     playCount: "38K",
     coverUrl: "https://picsum.photos/seed/song11/400/400",
-    starLevel: [0],
+    starLevel: [0, 0],
     isSotd: false,
     isDeluxe: true,
-    isLocked: [true],
-    coinCost: 500
+    isLocked: [true, true],
+    coinCost: 500,
+    noteCount: [52, 150]
   },
   {
     id: "song-12",
     title: "About Damn Time",
     artist: "Lizzo",
-    level: [2],
-    score: [0],
+    level: [2, 6],
+    score: [0, 0],
     playCount: "9K",
     coverUrl: "https://picsum.photos/seed/song12/400/400",
-    starLevel: [0],
+    starLevel: [0, 0],
     isSotd: false,
     isDeluxe: false,
-    isLocked: [true],
-    coinCost: 350
+    isLocked: [true, true],
+    coinCost: 350,
+    noteCount: [78, 198]
   },
   {
     id: "song-13",
@@ -194,21 +206,23 @@ export const MOCK_SONGS = [
     isSotd: false,
     isDeluxe: false,
     isLocked: [true],
-    coinCost: 500
+    coinCost: 500,
+    noteCount: [82]
   },
   {
     id: "song-14",
     title: "Heat Waves",
     artist: "Glass Animals",
-    level: [2],
-    score: [0],
+    level: [2, 3, 5],
+    score: [0, 0, 0],
     playCount: "60K",
     coverUrl: "https://picsum.photos/seed/song14/400/400",
-    starLevel: [0],
+    starLevel: [0, 0, 0],
     isSotd: false,
     isDeluxe: false,
-    isLocked: [true],
-    coinCost: 1000
+    isLocked: [true, true, true],
+    coinCost: 1000,
+    noteCount: [74, 98, 158]
   },
   {
     id: "song-15",
@@ -222,7 +236,8 @@ export const MOCK_SONGS = [
     isSotd: false,
     isDeluxe: true,
     isLocked: [true],
-    coinCost: 1500
+    coinCost: 1500,
+    noteCount: [122]
   },
   {
     id: "song-16",
@@ -236,21 +251,23 @@ export const MOCK_SONGS = [
     isSotd: false,
     isDeluxe: false,
     isLocked: [true],
-    coinCost: 500
+    coinCost: 500,
+    noteCount: [92]
   },
   {
     id: "song-17",
     title: "Glimpse of Us",
     artist: "Joji",
-    level: [1],
-    score: [0],
+    level: [1, 6],
+    score: [0, 0],
     playCount: "44K",
     coverUrl: "https://picsum.photos/seed/song17/400/400",
-    starLevel: [0],
+    starLevel: [0, 0],
     isSotd: false,
     isDeluxe: false,
-    isLocked: [true],
-    coinCost: 250
+    isLocked: [true, true],
+    coinCost: 250,
+    noteCount: [45, 185]
   },
   {
     id: "song-18",
@@ -264,35 +281,38 @@ export const MOCK_SONGS = [
     isSotd: false,
     isDeluxe: true,
     isLocked: [true],
-    coinCost: 2000
+    coinCost: 2000,
+    noteCount: [142]
   },
   {
     id: "song-19",
     title: "Left and Right",
     artist: "Charlie Puth",
-    level: [2],
-    score: [0],
+    level: [2, 5],
+    score: [0, 0],
     playCount: "22K",
     coverUrl: "https://picsum.photos/seed/song19/400/400",
-    starLevel: [0],
+    starLevel: [0, 0],
     isSotd: false,
     isDeluxe: false,
-    isLocked: [true],
-    coinCost: 350
+    isLocked: [true, true],
+    coinCost: 350,
+    noteCount: [65, 148]
   },
   {
     id: "song-20",
     title: "Hold Me Closer",
     artist: "Elton John",
-    level: [2],
-    score: [0],
+    level: [2, 4],
+    score: [0, 0],
     playCount: "6K",
     coverUrl: "https://picsum.photos/seed/song20/400/400",
-    starLevel: [0],
+    starLevel: [0, 0],
     isSotd: false,
     isDeluxe: false,
-    isLocked: [true],
-    coinCost: 350
+    isLocked: [true, true],
+    coinCost: 350,
+    noteCount: [70, 128]
   },
   {
     id: "song-21",
@@ -306,7 +326,8 @@ export const MOCK_SONGS = [
     isSotd: false,
     isDeluxe: false,
     isLocked: [true],
-    coinCost: 750
+    coinCost: 750,
+    noteCount: [112]
   },
   {
     id: "song-22",
@@ -320,21 +341,23 @@ export const MOCK_SONGS = [
     isSotd: false,
     isDeluxe: true,
     isLocked: [true],
-    coinCost: 1000
+    coinCost: 1000,
+    noteCount: [86]
   },
   {
     id: "song-23",
     title: "Anti-Hero",
     artist: "Taylor Swift",
-    level: [1],
-    score: [0],
+    level: [1, 3, 5],
+    score: [0, 0, 0],
     playCount: "82K",
     coverUrl: "https://picsum.photos/seed/song23/400/400",
-    starLevel: [0],
+    starLevel: [0, 0, 0],
     isSotd: false,
     isDeluxe: false,
-    isLocked: [true],
-    coinCost: 250
+    isLocked: [true, true, true],
+    coinCost: 250,
+    noteCount: [46, 94, 154]
   },
   {
     id: "song-24",
@@ -348,7 +371,8 @@ export const MOCK_SONGS = [
     isSotd: false,
     isDeluxe: false,
     isLocked: [true],
-    coinCost: 350
+    coinCost: 350,
+    noteCount: [62]
   },
   {
     id: "song-25",
@@ -362,7 +386,8 @@ export const MOCK_SONGS = [
     isSotd: false,
     isDeluxe: false,
     isLocked: [true],
-    coinCost: 250
+    coinCost: 250,
+    noteCount: [55]
   },
   {
     id: "song-26",
@@ -376,21 +401,23 @@ export const MOCK_SONGS = [
     isSotd: false,
     isDeluxe: true,
     isLocked: [true],
-    coinCost: 3000
+    coinCost: 3000,
+    noteCount: [205]
   },
   {
     id: "song-27",
     title: "Boy's a Liar Pt. 2",
     artist: "PinkPantheress",
-    level: [2],
-    score: [0],
+    level: [2, 3, 5],
+    score: [0, 0, 0],
     playCount: "27K",
     coverUrl: "https://picsum.photos/seed/song27/400/400",
-    starLevel: [0],
+    starLevel: [0, 0, 0],
     isSotd: false,
     isDeluxe: false,
-    isLocked: [true],
-    coinCost: 350
+    isLocked: [true, true, true],
+    coinCost: 350,
+    noteCount: [66, 102, 166]
   },
   {
     id: "song-28",
@@ -404,20 +431,22 @@ export const MOCK_SONGS = [
     isSotd: false,
     isDeluxe: true,
     isLocked: [true],
-    coinCost: 1000
+    coinCost: 1000,
+    noteCount: [105]
   },
   {
     id: "song-29",
     title: "Paint The Town Red",
     artist: "Doja Cat",
-    level: [4],
-    score: [0],
+    level: [4, 6],
+    score: [0, 0],
     playCount: "36K",
     coverUrl: "https://picsum.photos/seed/song29/400/400",
-    starLevel: [0],
+    starLevel: [0, 0],
     isSotd: false,
     isDeluxe: false,
-    isLocked: [true],
-    coinCost: 750
+    isLocked: [true, true],
+    coinCost: 750,
+    noteCount: [132, 225]
   }
 ];

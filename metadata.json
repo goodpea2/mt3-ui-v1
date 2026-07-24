@@ -1,5 +1,8 @@
 {
   "name": "MT3-UI Mockup",
-  "description": "",
-  "requestFramePermissions": []
+  "description": "Premium rhythm action simulator with persistent companion pets, boss battles, level up rewards, and visual effects.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
 }
